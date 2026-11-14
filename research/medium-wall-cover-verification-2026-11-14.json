@@ -1,0 +1,32 @@
+{
+  "version": "0.43.13",
+  "date": "2026-11-14",
+  "policy": {
+    "fourVisible": "Unobstructed; no wall cover.",
+    "threeVisible": "More than half visible; no wall cover.",
+    "twoVisible": "Half visible; standard cover (+2).",
+    "oneVisible": "Greater cover (+4).",
+    "zeroVisible": "Sight blocked."
+  },
+  "tests": {
+    "fullPassed": 1219,
+    "failed": 0,
+    "testFiles": 97,
+    "parallelProcesses": 11,
+    "elapsedSeconds": 28.9,
+    "regression": "A Medium target with exactly two of four visible footprint corners receives standard cover; three visible corners receive no wall cover."
+  },
+  "artifact": {
+    "archive": "releases/pf2e-tactical-suite-0.43.13.zip",
+    "archiveBytes": 711982,
+    "sha256": "768D947F3B0B2BE1CC36C625DCBFDB5714C67FDAA0DF0DC497D821E470D22F8D",
+    "packages": 5,
+    "installedPath": "C:/Users/Roman/AppData/Local/FoundryVTT/Data/modules"
+  },
+  "native": {
+    "worldDatabaseChanged": false,
+    "browserReloadRequired": true,
+    "foundryRestartRequired": false,
+    "liveReplayPending": true
+  }
+}

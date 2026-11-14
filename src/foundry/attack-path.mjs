@@ -56,7 +56,7 @@ export function footprintVisibility(observer,target,{type='sight',origin,destina
     visible=Math.max(visible,count);
   }
   if(!visible)return {visible:false,unobstructed:false,visiblePoints:0,totalPoints:targets.length,coverBonus:0};
-  const coverBonus=visible===1?4:visible*2<targets.length?2:0;
+  const coverBonus=visible===1?4:visible*2<=targets.length?2:0;
   return {visible:true,unobstructed:false,visiblePoints:visible,totalPoints:targets.length,coverBonus};
 }
 

@@ -18,8 +18,8 @@ PF2e's published default cover procedure draws a line between creature centers. 
 4. If one observer intersection can see every target intersection, the view is unobstructed.
 5. If no target intersection is visible, line of sight or physical line of effect is blocked.
 6. If the best observer intersection sees exactly one target intersection, the target has greater cover (+4 AC and +4 Stealth where applicable).
-7. If it sees more than one but fewer than half of the target intersections, the target has standard cover (+2).
-8. If it sees at least half, the partial obstruction grants no cover under this table policy.
+7. If it sees more than one but no more than half of the target intersections, the target has standard cover (+2).
+8. If it sees more than half, the partial obstruction grants no cover under this table policy.
 
 The sight calculation is used for wall visibility, wall-derived cover, Hide eligibility, continuous cover during Sneak, captions, reactions, and AI decisions. Physical attack paths use the same footprint sampling with movement collision so a transparent solid barrier can still stop an attack. Explicit cover/concealment Regions remain a separate sight-height line test and combine by using the highest applicable cover bonus.
 

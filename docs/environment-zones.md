@@ -26,7 +26,7 @@ Cover uses the native sight-height line between the creatures. Entering, leaving
 
 Overlaps use the highest cover bonus and one concealment flat check. Lesser cover is +1 AC and does not permit Hide; standard/greater cover allow Hide and provide +2/+4 Stealth in the scout handler. Concealment can also permit Hide, but does not grant a Stealth bonus or automatically make someone Hidden.
 
-Native sight walls use the campaign's [footprint-corner visibility policy](stealth-corner-visibility-0.43.11.md). Medium creatures contribute four corners; larger creatures contribute every grid intersection across their footprint. One observer intersection seeing the whole target footprint is unobstructed, exactly one visible target intersection grants greater cover, and more than one but fewer than half grants standard cover. Zero visible intersections blocks sight. Movement-only barriers do not count as visibility walls. Explicit Region cover remains a separate sight-height line test and combines with wall cover by using the highest applicable bonus.
+Native sight walls use the campaign's [footprint-corner visibility policy](stealth-corner-visibility-0.43.11.md). Medium creatures contribute four corners; larger creatures contribute every grid intersection across their footprint. One observer intersection seeing the whole target footprint is unobstructed, exactly one visible target intersection grants greater cover, and more than one but no more than half grants standard cover. Zero visible intersections blocks sight. Movement-only barriers do not count as visibility walls. Explicit Region cover remains a separate sight-height line test and combines with wall cover by using the highest applicable bonus.
 
 ## Firing from behind cover
 
