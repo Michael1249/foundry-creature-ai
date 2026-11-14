@@ -7,7 +7,7 @@ Ramps belong to **PF2e Tactical Rules — Movement** and work with Creature AI d
 3. Set **Lower elevation**, **Upper elevation**, and **Uphill direction**. For stairs rising from ground to a 10-foot platform toward the top of the map, use **0**, **10**, **North**. Elevations use the scene's distance units and token bottom elevation.
 4. Start a token at the low edge and move normally. Height follows the slope in either direction; no teleport, climb roll or additional action is introduced. Native movement costs, walls and reaction handling still apply. Step and Sneak retain their usual limits.
 
-The token-controls **Ramps / stairs** button is an alternative editor: select a Region, load its values, then **Save ramp**. It creates the same native behavior. Later edits can use either this helper or the standard behavior sheet. Legacy ramps prefill their elevations and nearest compass direction; saving replaces their fixed axis with the Region's full shape.
+The Region Controls **Ramps / stairs** button is an alternative editor: select a Region, load its values, then **Save ramp**. It creates the same native behavior. Later edits can use either this helper or the standard behavior sheet. Legacy ramps prefill their elevations and nearest compass direction; saving replaces their fixed axis with the Region's full shape.
 
 The Region's full extent in the chosen compass direction defines the low and high ends. Moving or resizing its shape moves those ends automatically. Its shape controls the width. Disable the behavior or hide the Region to turn the ramp off. Existing flag-based Stadium ramps continue to work until deliberately edited; no scene artwork is rewritten.
 

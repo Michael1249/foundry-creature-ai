@@ -17,6 +17,6 @@ getRulesRuntime().register('movement',{
   },
   start:runtime=>{installPits(runtime);installFlightCosts({packageId:CORE_ID});installFlightFalls({reactions:runtime.reactions,onError:runtime.onError});runtime.playerStealth.installRolls({packageId:CORE_ID});},
   controls:[{name:'playerStealth',title:'Hide / Sneak (PCs and NPCs)',icon:'fa-solid fa-user-secret',order:104,run:runtime=>runtime.playerStealth.open()},
-    {name:'rampControls',title:'Ramps / stairs',icon:'fa-solid fa-stairs',order:107,gmOnly:true,run:()=>openRamps()},
+    {name:'rampControls',title:'Ramps / stairs',icon:'fa-solid fa-stairs',order:107,palette:'regions',gmOnly:true,run:()=>openRamps()},
     {name:'pitControls',title:'Pit: Climb / Jump',icon:'fa-solid fa-person-falling',order:110,run:()=>openPitActions()}],
 });

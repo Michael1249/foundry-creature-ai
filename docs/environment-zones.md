@@ -8,7 +8,7 @@ The module uses ordinary Foundry **Scene Regions**. Since 0.13.0, the cloud edit
 
 1. Reload every connected client with **Ctrl+F5**. Confirm the NPC controls show **Running code 0.23.1**. libWrapper must be enabled; it was already enabled in the inspected arena configuration.
 2. Use Foundry's **Scene Region** drawing tools to draw a rectangle or polygon around foliage, smoke, an obstacle, or a protected area behind a barricade. Draw its actual footprint; native holes, elevation bounds and scene levels are respected. Set suitable elevation bounds for the creatures' native sight-ray heights. Region display color/visibility is presentation; native **Hidden** deactivates an attached behavior, as does disabling the behavior itself.
-3. In the **Token tools**, click the **cloud icon — Cover / concealment zones**. Select the region. To reopen a different region's saved values, select it and click **Load region**.
+3. In the **Region tools**, click the **cloud icon — Cover / concealment zones**. Select the region. To reopen a different region's saved values, select it and click **Load region**.
 4. Choose a cover and/or concealment mode, leave **Enabled** checked, and **Save zone**. This attaches/updates its named behavior. Clearing Enabled, or disabling that behavior in the Region sheet, stops its mechanical effects while preserving the settings.
 5. Select an unlinked taught NPC and use **Alt+W**. Preview and the recorded decision explanation list environmental attack defenses. For a scout, save its current loaded/unloaded crossbow state before running.
 

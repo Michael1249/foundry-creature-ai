@@ -1,0 +1,42 @@
+{
+  "version": "0.43.10",
+  "date": "2026-11-14",
+  "policy": {
+    "regions": [
+      "Cover / concealment zones",
+      "Ramps / stairs"
+    ],
+    "tokens": [
+      "Reaction controls",
+      "Detection controls",
+      "Hide / Sneak",
+      "Condition actions / sources",
+      "Ongoing spells / Sustain",
+      "Spell AI / shared definitions",
+      "Vampire forms / vulnerabilities",
+      "Ice walls: attack a section",
+      "Pit: Climb / Jump"
+    ],
+    "pitRationale": "Pit: Climb / Jump performs a selected creature's action around an existing pit and does not configure the Region."
+  },
+  "tests": {
+    "fullPassed": 1214,
+    "failed": 0,
+    "testFiles": 97,
+    "parallelProcesses": 11,
+    "elapsedSeconds": 27.3,
+    "regression": "The cloud and ramp tools exist in Region Controls and are absent from Token Controls; token actions remain available in Token Controls."
+  },
+  "artifact": {
+    "archive": "releases/pf2e-tactical-suite-0.43.10.zip",
+    "archiveBytes": 710078,
+    "sha256": "61B701B1BE9E0DCDE0E0881B94DB4F4301588DA67306769AB272943B9F3C9F8F",
+    "packages": 5,
+    "installedPath": "C:/Users/Roman/AppData/Local/FoundryVTT/Data/modules"
+  },
+  "native": {
+    "worldDatabaseChanged": false,
+    "browserReloadRequired": true,
+    "liveReplayPending": true
+  }
+}

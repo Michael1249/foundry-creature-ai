@@ -126,14 +126,16 @@ export class RulesRuntime {
     Hooks.on('updateCombat',combat=>{if(this.has('conditions'))void expireSpellZones({combat}).catch(this.onError);refresh();});
     Hooks.on('updateWorldTime',()=>{if(this.has('conditions'))void expireSpellZones().catch(this.onError);});
     Hooks.on('getSceneControlButtons',controls=>{
-      if(!controls.tokens?.tools)return;const tools=controls.tokens.tools;
-      const add=(name,title,icon,order,handler)=>tools[name]={name,title,icon,order,button:true,control:true,onChange:()=>{Promise.resolve(handler()).catch(this.onError);}};
+      const add=(palette,name,title,icon,order,handler)=>{
+        const tools=controls[palette]?.tools;if(!tools)return;
+        tools[name]={name,title,icon,order,button:true,control:true,onChange:()=>{Promise.resolve(handler()).catch(this.onError);}};
+      };
       for(const controller of this.controllers.values())for(const control of controller.controls??[]){
         if(control.gmOnly&&!game.user?.isGM)continue;
-        add(control.name,control.title,control.icon,control.order,()=>control.run(this));
+        add(control.palette??'tokens',control.name,control.title,control.icon,control.order,()=>control.run(this));
       }
       if(!game.user?.isGM)return;
-      add('reactionControls','Reaction controls','fa-solid fa-shield-halved',101,()=>this.reactions.openControls());
+      add('tokens','reactionControls','Reaction controls','fa-solid fa-shield-halved',101,()=>this.reactions.openControls());
     });
   }
 }

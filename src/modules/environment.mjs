@@ -7,6 +7,6 @@ import {openZones} from '../foundry/environment-zones.mjs';
 getRulesRuntime().register('environment',{
   init:runtime=>registerRulesSetting('directionalZoneIndicators',{name:'Show directional zone defenses',scope:'client',config:true,type:Boolean,default:true,onChange:()=>void runtime.refresh()}),
   start:runtime=>{installHazardMovement({packageId:CORE_ID});runtime.environmentAwareness.install({packageId:CORE_ID});installStealthVisibility({packageId:CORE_ID});},
-  controls:[{name:'environmentZones',title:'Cover / concealment zones',icon:'fa-solid fa-cloud',order:102,gmOnly:true,run:()=>openZones()},
+  controls:[{name:'environmentZones',title:'Cover / concealment zones',icon:'fa-solid fa-cloud',order:102,palette:'regions',gmOnly:true,run:()=>openZones()},
     {name:'stealthControls',title:'Detection controls',icon:'fa-solid fa-eye',order:103,gmOnly:true,run:()=>openStealthControls()}],
 });
