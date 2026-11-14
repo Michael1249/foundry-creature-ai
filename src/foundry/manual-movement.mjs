@@ -6,7 +6,7 @@ import { incapacitationReason } from './combat-state.mjs';
 import { unsupportedMovementRegions, terrainMovementPath } from './movement-regions.mjs';
 import { beginTerrainAction, endTerrainAction } from './hazardous-terrain.mjs';
 import { playerSneakSpeed } from './player-stealth.mjs';
-import { STEALTH_MOVEMENT } from './stealth-awareness.mjs';
+import { STEALTH_MOVEMENT, stealthContext } from './stealth-awareness.mjs';
 import { greaseOnPath, greaseExtraCost, prepareGreaseMove, withGreaseMode } from './spell-zones.mjs';
 import { settleGreaseSlip, finishGreaseFall } from './grease-landing.mjs';
 import { surfaceMovementPath } from './surface-terrain.mjs';
@@ -170,7 +170,8 @@ export class ManualMovement {
     const player = this.playerStealth?.movementEnabled(token)||mode==='sneak'&&this.playerStealth?.supports(token);
     const greasy = token?.actor && greaseOnPath(token,points);
     if (!this.enabled() && !player && !greasy&&!explicitMode || !game.combat?.started && !player && !greasy&&!explicitMode) return;
-    if (!token?.actor || game.combat?.started && (game.combat.combatant?.tokenId !== token.id || game.combat.combatant?.sceneId &&
+    const scopedCombatId=token?stealthContext(token).combatId:null;
+    if (!token?.actor || scopedCombatId && (game.combat.combatant?.tokenId !== token.id || game.combat.combatant?.sceneId &&
       game.combat.combatant.sceneId !== document.parent.id)) return;
     if (points.slice(1).every(point => point.x === points[0].x && point.y === points[0].y) ||
       points.slice(1).every(point => point.action === 'displace')) return;
@@ -218,7 +219,7 @@ export class ManualMovement {
     const generation = this.generation;
     const valid = () => generation === this.generation && combatStamp() === data.stamp && Date.now() < data.expires &&
       game.users.activeGM?.id === game.user.id && canvas.scene?.id === data.sceneId && !game.paused &&
-      canvas.tokens.get(token.id) === token && (!game.combat?.started ? player || greasy||explicitMode : game.combat.combatant?.tokenId === token.id) &&
+      canvas.tokens.get(token.id) === token && (!stealthContext(token).combatId ? player || greasy||explicitMode : game.combat.combatant?.tokenId === token.id) &&
       (sender.isGM || token.actor.testUserPermission(sender, 'OWNER'));
     if (!valid() || !samePosition(position(token.document), data.origin)) throw new Error('The movement trigger changed; move again from the current position.');
     let path = this.path(token, data.path);

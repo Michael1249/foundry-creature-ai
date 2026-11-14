@@ -452,6 +452,16 @@ test('an unrelated active combat cannot scope a scene token out of manual stealt
   assert.deepEqual(stealthRecord(f.player).entries.map(entry=>entry.observerId),[f.boss.id]);
 });
 
+test('an empty active combat still intercepts selected Sneak movement and rolls its secret check',async()=>{
+  const f=setup();f.combat.combatants=[];f.combat.combatant=null;fog();
+  await f.controller.request('hide');await f.controller.request('arm-sneak');
+  const origin={...f.point(500),action:'sneak'},destination={...f.point(600),action:'sneak'};
+  assert.equal(f.movement.intercept(f.player.document,{method:'dragging',origin,passed:{waypoints:[]},pending:{waypoints:[destination]}}),false);
+  for(let i=0;i<30&&f.movement.pending.size;i++)await new Promise(resolve=>setTimeout(resolve,1));
+  assert.deepEqual(f.errors,[]);assert.equal(f.player.document.x,600);
+  assert.deepEqual(f.calls.filter(call=>call[0]==='stealth').map(call=>call[1].action),['hide','sneak']);
+});
+
 test('native hazard checkpoints do not replace the original snapped player movement request',async()=>{
   const f=setup({answer:'stride'});fog();
   const initial=[f.point(500),f.point(600)];

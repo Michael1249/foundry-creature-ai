@@ -1,15 +1,15 @@
-# Manual Hide and Sneak — 0.36.2
+# Manual Hide and Sneak — 0.43.16
 
 The **PF2e Tactical Rules — Movement** module supports both PC and manually controlled NPC creature tokens. **Sneak** was previously filtered out for NPCs; 0.36.2 removes that restriction. Reload every client with **Ctrl+F5**. The world setting **Manual Hide and Sneak (PCs and NPCs)** defaults on. An active GM resolves secret checks and saves observer results. No AI profile is needed.
 
 ## Play
 
 1. Select a creature token you own, or any creature as GM. Use the sheet's **Hide** action, or the **Hide / Sneak (PCs and NPCs)** token tool. A native Hide roll is reused rather than rolled twice.
-2. Choose **Sneak** from the token's native movement menu, then drag a ground path. **Step** and **Walk** are in the same menu; no movement-choice popup is needed.
-3. Choosing Sneak adds a removable **Sneak** effect. The measured path is split into the maximum distance allowed by each Sneak action. Each calculated action makes its own secret check and carries its result into the next action. The mode itself grants no Hidden or Undetected state.
+2. Choose **Sneak** from the token's native movement menu, then drag a ground path. **Step** and **Walk** are in the same menu; no movement-choice popup is needed. The ruler distance shows Foundry's action glyph for the Sneak action containing that waypoint, including an overage marker beyond three actions.
+3. Choosing Sneak adds a removable **Sneak** effect. The measured path is split into the maximum distance allowed by each Sneak action. Each calculated action makes its own secret check after you commit the movement and carries its result into the next action. Previewing the ruler does not roll. The mode itself grants no Hidden or Undetected state.
 4. Choose **Walk**, remove the effect, or use **Stop Sneak** to return to normal movement. Removing the mode does not instantly reveal the creature; revealing actions still do. The completion notice reports how many Sneak actions and secret checks the path used. A combat path requiring more than three Sneak actions is rejected because the module cannot infer extra-action permissions; manual users remain responsible for their action total.
 
-NPC manual checks use the same observer records, native Stealth statistic, Speed and terrain rules as PCs. Existing AI-managed moves/rolls bypass manual handling, and AI-owned stealth records keep their existing refresh lifecycle. Movement automation applies during the creature's active turn in combat, and also supports eligible movement outside combat.
+NPC manual checks use the same observer records, native Stealth statistic, Speed and terrain rules as PCs. Existing AI-managed moves/rolls bypass manual handling, and AI-owned stealth records keep their existing refresh lifecycle. Movement automation applies during the creature's active turn in combat, and also supports eligible movement outside combat. An empty, stale, or unrelated active encounter is treated as scene movement rather than suppressing the Sneak handler.
 
 ## Detection and rules
 

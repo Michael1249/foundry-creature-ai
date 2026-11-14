@@ -1,0 +1,50 @@
+{
+  "version": "0.43.16",
+  "date": "2026-11-14",
+  "issue": {
+    "symptoms": [
+      "Committing a path in native Sneak mode produced no secret Sneak check.",
+      "The ruler distance did not show which Sneak action contained the waypoint."
+    ],
+    "liveDiagnosis": {
+      "world": "pathfinder-adventure-prey-for-death",
+      "scene": "Camp",
+      "combat": "MXlkfQtZWYH4bxSk",
+      "combatStarted": true,
+      "combatantCount": 0,
+      "tokensArmedForSneak": [
+        "Peak (Copy)",
+        "Red Mantis Conspirator"
+      ],
+      "cause": "Manual movement treated the stale empty encounter as authoritative and rejected every token as off-turn. The PF2e ruler had no action-cost provider for the custom Sneak movement action.",
+      "worldDatabaseChanged": false
+    }
+  },
+  "resolution": [
+    "Manual Sneak uses subject-aware combat scope, matching Hide: empty and unrelated encounters fall back to scene movement.",
+    "Sneak ruler labels use half prepared ground Speed per action, or full Speed with Swift Sneak, and mark paths beyond three actions.",
+    "The secret check still occurs only when movement is committed; ruler preview performs no roll."
+  ],
+  "verification": {
+    "tests": {
+      "command": "npm test",
+      "files": 97,
+      "cases": 1226,
+      "passed": 1226,
+      "failed": 0
+    },
+    "release": {
+      "archive": "releases/pf2e-tactical-suite-0.43.16.zip",
+      "bytes": 716105,
+      "sha256": "1188e79154c4d8929f97a73be00eb847da5c9a46cda36fe4ba15c141a6f6db1d"
+    },
+    "installation": {
+      "packages": 5,
+      "installedVersion": "0.43.16",
+      "foundryPid": 25472,
+      "manifestHttpStatus": 200,
+      "serverRestarted": false,
+      "clientReloadRequired": "Ctrl+F5"
+    }
+  }
+}

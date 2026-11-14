@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {registerMovementModes,selectedGroundAction} from '../src/foundry/native-movement-modes.mjs';
+import {registerMovementModes,selectedGroundAction,sneakActionCost,decorateSneakRulerContext} from '../src/foundry/native-movement-modes.mjs';
 import {fixture} from './helpers/ogre-fixture.mjs';
 import {ManualMovement} from '../src/foundry/manual-movement.mjs';
 
@@ -19,6 +19,19 @@ test('native modes choose a single movement action and reject mixed actions with
  assert.equal(selectedGroundAction({movementAction:'sneak'},[]),'sneak');
  assert.equal(selectedGroundAction({},[{action:'walk'},{action:'fly'}]),'fly');
  assert.throws(()=>selectedGroundAction({},[{}, {action:'step'},{action:'sneak'}]),/one movement mode/);
+});
+test('Sneak ruler labels show the action containing each measured distance',()=>{
+ const f=fixture();f.player.actor.system.attributes.speed={total:25};f.player.actor.system.movement={speeds:{land:{value:25}}};
+ assert.deepEqual(sneakActionCost(f.player.actor,10),{actions:1,overage:false});
+ assert.deepEqual(sneakActionCost(f.player.actor,15),{actions:2,overage:false});
+ assert.deepEqual(sneakActionCost(f.player.actor,40),{actions:3,overage:true});
+ const context={cost:{}},waypoint={action:'sneak',measurement:{cost:15}};
+ assert.equal(decorateSneakRulerContext(context,waypoint,f.player.actor),context);
+ assert.deepEqual(context.actionCost,{actions:2,overage:false});
+ assert.equal(decorateSneakRulerContext({cost:{}},{action:'walk',measurement:{cost:50}},f.player.actor).actionCost,undefined);
+ f.player.actor.items.set('swift-sneak',{id:'swift-sneak',type:'feat',slug:'swift-sneak'});
+ assert.deepEqual(sneakActionCost(f.player.actor,25),{actions:1,overage:false});
+ assert.deepEqual(sneakActionCost(f.player.actor,50),{actions:2,overage:false});
 });
 test('a real native Step request is intercepted even without enemies, combat or reaction automation',async()=>{
  const f=fixture();game.combat=null;game.user.active=true;game.users.activeGM=game.user;f.player.document.object=f.player;
