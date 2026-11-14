@@ -1,6 +1,6 @@
 import {MODULE_ID,ENVIRONMENT_ID,CONDITIONS_ID,MOVEMENT_ID} from './rules-context.mjs';
 const owners={spellProfiles:CONDITIONS_ID,conditionRestrictions:CONDITIONS_ID,preventDuplicateConditionAutomation:CONDITIONS_ID,conditionAutomationBackup:CONDITIONS_ID,
-  directionalZoneIndicators:ENVIRONMENT_ID,playerStealth:MOVEMENT_ID,manualMovementReactions:MOVEMENT_ID};
+  directionalZoneIndicators:ENVIRONMENT_ID,stealthStatusDisplay:ENVIRONMENT_ID,playerStealth:MOVEMENT_ID,manualMovementReactions:MOVEMENT_ID};
 const registrations=new WeakMap();
 export function rulesSettingNamespace(key){
   const owner=owners[key]??MODULE_ID;

@@ -1,7 +1,7 @@
 // Elevation modules own the native tooltip. Tactical captions use a separate
 // child so neither module rewrites the other's PIXI text or rebuilds its texture.
 export class TokenCaptions {
-  constructor(){this.displays=new Map();}
+  constructor({visible=()=>true}={}){this.displays=new Map();this.visible=visible;}
   get(token){return this.displays.get(token);}
   remove(token){
     const display=this.get(token);this.displays.delete(token);
@@ -25,7 +25,7 @@ export class TokenCaptions {
   layout(token){
     const display=this.get(token),tooltip=token.tooltip;
     if(!display||display.destroyed||!tooltip)return;
-    display.visible=tooltip.visible!==false&&!token.document.isSecret;
+    display.visible=this.visible()&&tooltip.visible!==false&&!token.document.isSecret;
     display.scale.set(tooltip.scale.x,tooltip.scale.y);
     display.x=tooltip.x;
     display.y=tooltip.y-(tooltip.text?tooltip.height:0)-3*tooltip.scale.y;

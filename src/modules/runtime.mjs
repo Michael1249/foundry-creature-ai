@@ -40,7 +40,8 @@ export class RulesRuntime {
       onMoveAction:(...args)=>this.ai?.afterMove?.(...args),onError:this.onError});
     this.reactions.afterMoveAction=(...args)=>this.ai?.afterMove?.(...args);
     this.zoneConcealment=new ZoneConcealment();
-    this.environmentAwareness=new EnvironmentAwareness({enabled:()=>this.has('environment')&&rulesSetting('directionalZoneIndicators')!==false});
+    this.environmentAwareness=new EnvironmentAwareness({enabled:()=>this.has('environment')&&rulesSetting('directionalZoneIndicators')!==false,
+      captionMode:()=>rulesSetting('stealthStatusDisplay')??'always'});
     this.onHazardMove=createHazardHandler({resolve:operation=>this.reactions.resolve(operation),onPause:()=>this.pause(),resolveFire:resolveFireDamage});
     this.rules={reactions:this.reactions,manualMovement:this.manualMovement,
       zones:{open:openZones,configure:configureZone,between:environmentBetween,refresh:()=>this.refresh(),view:()=>({observerId:this.environmentAwareness.observer?.id??null,

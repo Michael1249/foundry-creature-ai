@@ -1,0 +1,55 @@
+{
+  "version": "0.43.18",
+  "date": "2026-11-14",
+  "manualSneak": {
+    "policy": "One secret Stealth roll per cumulative Sneak action budget, independent of how many manual drags represent that action.",
+    "example": {
+      "preparedSpeed": 25,
+      "sneakBudget": 12.5,
+      "firstDragFeet": 5,
+      "secondDragCumulativeFeet": 10,
+      "rollsAfterSecondDrag": 1,
+      "thirdDragCumulativeFeet": 15,
+      "rollsAfterThirdDrag": 2
+    },
+    "storage": "Active-GM runtime memory only; secret roll data is not stored in token flags or exposed to AI planning.",
+    "resetEvents": [
+      "combat turn or encounter stamp changes",
+      "different or revealing action",
+      "Sneak stops",
+      "movement interruption",
+      "Sneak Speed changes",
+      "scene or runtime cancellation"
+    ]
+  },
+  "captions": {
+    "states": ["Observed", "Hidden", "Undetected"],
+    "clientSetting": "Token stealth status hints",
+    "modes": ["Always", "While holding key"],
+    "keybinding": "Show token stealth status hints",
+    "defaultBinding": "Alt+V",
+    "foundryControlsConfigurable": true
+  },
+  "verification": {
+    "tests": {
+      "command": "npm test",
+      "files": 97,
+      "cases": 1229,
+      "passed": 1229,
+      "failed": 0
+    },
+    "release": {
+      "archive": "releases/pf2e-tactical-suite-0.43.18.zip",
+      "bytes": 718164,
+      "sha256": "575de40d7e281ceb1426c076ba1a40021ba7735211c84989d8d75436b31a4a61"
+    },
+    "installation": {
+      "packages": 5,
+      "installedVersion": "0.43.18",
+      "foundryPid": 25472,
+      "manifestHttpStatus": 200,
+      "serverRestarted": false,
+      "clientReloadRequired": "Ctrl+F5"
+    }
+  }
+}

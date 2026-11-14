@@ -27,12 +27,21 @@ export function stealthStart(observer,subject){
 
 export class PlayerStealth {
   constructor({enabled=()=>true,onError=error=>ui.notifications.error(error.message)}={}){
-    this.enabled=enabled;this.onError=onError;this.pending=new Set();this.completed=new Map();this.mirrorQueue=Promise.resolve();
+    this.enabled=enabled;this.onError=onError;this.pending=new Set();this.completed=new Map();this.mirrorQueue=Promise.resolve();this.sneakActions=new Map();
   }
   supports(token){return this.enabled()&&token?.actor?.isOfType?.('creature');}
   movementEnabled(token){return this.supports(token)&&(stealthObservers(token).length>0||stealthRecord(token)?.entries.length>0||this.armed(token));}
   armed(token){return sneakMode(token);}
   enableSneak(token){return setSneakMode(token,true);}
+  clearSneakAction(token){if(token)this.sneakActions.delete(token.id);else this.sneakActions.clear();}
+  sneakAction(token,{stamp,budget}={}){
+    const saved=this.sneakActions.get(token?.id),current=token&&position(token);
+    if(!saved||saved.stamp!==stamp||saved.budget!==budget||!this.armed(token)||!equal(saved.endpoint,current)){
+      if(token)this.clearSneakAction(token);return null;
+    }
+    return saved;
+  }
+  rememberSneakAction(token,state){this.sneakActions.set(token.id,{...state,endpoint:position(token)});}
   mirror(subject){
     // Two players can Hide at once. Serialize read/modify/write operations on
     // their shared observers so one character's result cannot erase another's.
@@ -54,7 +63,7 @@ export class PlayerStealth {
       if(JSON.stringify(saved)!==JSON.stringify(next))await observer.document.setFlag(ns,'perception',next);
     }
   }
-  async clear(subject){await reveal(subject);await this.mirror(subject);}
+  async clear(subject){this.clearSneakAction(subject);await reveal(subject);await this.mirror(subject);}
   async afterStep(subject){
     const saved=stealthRecord(subject);if(!saved)return;
     const entries=saved.entries.filter(entry=>canvas.tokens.get(entry.observerId)).map(entry=>{
@@ -77,6 +86,7 @@ export class PlayerStealth {
           // AI-owned NPC records keep their existing lifecycle. Reconcile NPCs
           // here only after manual stealth or an explicitly armed Sneak mode.
           const manual=!subject.actor?.isOfType?.('npc')||saved?.manual||this.armed(subject);
+          if(this.supports(subject)&&!this.armed(subject))this.clearSneakAction(subject);
           if(this.supports(subject)&&manual&&saved&&!saved.moving&&!this.pending.has(subject.id))await this.afterStep(subject);
         }
       }while(this.refreshAgain);
@@ -103,11 +113,12 @@ export class PlayerStealth {
       canvas.tokens.get(token.id)===token&&equal(position(token),data.origin)&&(sender.isGM||token.actor.testUserPermission(sender,'OWNER'));
     this.pending.add(token.id);
     try{
-      if(data.action==='arm-sneak')await this.enableSneak(token);
-      else if(data.action==='stop-sneak')await setSneakMode(token,false);
+      if(data.action==='arm-sneak'){this.clearSneakAction(token);await this.enableSneak(token);}
+      else if(data.action==='stop-sneak'){this.clearSneakAction(token);await setSneakMode(token,false);}
       else if(data.action==='reveal'){await this.clear(token);await setSneakMode(token,false);}
-      else if(data.action==='reveal-action')await this.clear(token);
+      else if(data.action==='reveal-action'){this.clearSneakAction(token);await this.clear(token);}
       else if(['hide','resolve-hide-roll'].includes(data.action)){
+        this.clearSneakAction(token);
         const restriction=actionRestriction(token.actor);if(restriction)throw new Error(restriction.reason);
         let providedRoll,circumstanceBonus;
         if(data.action==='resolve-hide-roll'){
@@ -142,13 +153,19 @@ export class PlayerStealth {
     return {observers,starts,eligible,roll,context};
   }
   async finishSneak(token,plan,traveled){
+    return this.applySneak(token,plan,traveled,false);
+  }
+  async continueSneak(token,plan,traveled){
+    return this.applySneak(token,plan,traveled,true);
+  }
+  async applySneak(token,plan,traveled,moving){
     const context=stealthContext(token);
     if(game.users.activeGM?.id!==game.user.id||context.sceneId!==plan.context.sceneId||context.combatId!==plan.context.combatId)return;
-    const actual=position(token),path=[...traveled];if(!equal(path.at(-1),actual))path.push(actual);
+    const actual=position(token),path=[...traveled];if(!moving&&!equal(path.at(-1),actual))path.push(actual);
     const observers=plan.observers.filter(observer=>canvas.tokens.get(observer.id)===observer);
     const coverThroughout=new Map(observers.map(observer=>[observer.id,coverAlongPath(observer,token,path.map(p=>center(token,p)))]));
-    await rollStealth(token,'sneak',{observers,starts:plan.starts,eligible:plan.eligible,coverThroughout,destination:center(token,actual),
-      moving:false,providedRoll:plan.roll,manual:true});
+    await rollStealth(token,'sneak',{observers,starts:plan.starts,eligible:plan.eligible,coverThroughout,destination:center(token,moving?path.at(-1):actual),
+      moving,providedRoll:plan.roll,manual:true});
     await this.mirror(token);
   }
   async open(token=canvas.tokens.controlled[0]){

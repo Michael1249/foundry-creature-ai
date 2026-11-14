@@ -28,7 +28,7 @@ export class ManualMovement {
     this.generation = 0; this.pending = new Set(); this.running = false;
     this.readinessNotices = new Map();
   }
-  cancel() { this.generation++; }
+  cancel() { this.generation++;this.playerStealth?.clearSneakAction(); }
   install() {
     CONFIG.queries ??= {};
     CONFIG.queries[MOVEMENT_QUERY] = (data, { user }) => this.receive(data, user);
@@ -90,71 +90,91 @@ export class ManualMovement {
     if (path.length > 256) throw new Error('Split this movement into individual move actions.');
     return path.map(point=>({...origin,...point,action:'walk',snapped:surface?Boolean(point.snapped):true}));
   }
-  sneakActionPaths(token,path,budget,history=[...(token.document.movementHistory??[])]){
+  sneakActionPaths(token,path,budget,history=[...(token.document.movementHistory??[])],progress=null){
     if(!(budget>0)||path.length<2)throw new Error('This creature has no usable Sneak movement budget.');
     const historyCost=history.length?token.measureMovementPath(history).cost:0;
     const cumulative=path.map((_point,index)=>index===0?0:withGreaseMode(token,'sneak',()=>
       Math.max(0,token.measureMovementPath([...history,...terrainMovementPath(token,path.slice(0,index+1))]).cost-historyCost)+
       greaseExtraCost(token,path.slice(0,index+1),'sneak')));
     if(cumulative.some(cost=>!Number.isFinite(cost)))throw new Error('Cannot measure this Sneak path.');
-    const actions=[];let start=0;
+    const actions=[];let start=0,continuing=Boolean(progress),number=progress?.number??1;
+    let remaining=continuing?Math.max(0,budget-progress.cost):budget;
     while(start<path.length-1){
       let end=start;
-      while(end+1<path.length&&cumulative[end+1]-cumulative[start]<=budget+1e-8)end++;
-      if(end===start)throw new Error(`One square of this path costs more than the ${budget}-foot Sneak budget.`);
-      actions.push(path.slice(start,end+1));start=end;
+      while(end+1<path.length&&cumulative[end+1]-cumulative[start]<=remaining+1e-8)end++;
+      if(end===start){
+        if(continuing){continuing=false;number++;remaining=budget;continue;}
+        throw new Error(`One square of this path costs more than the ${budget}-foot Sneak budget.`);
+      }
+      actions.push({path:path.slice(start,end+1),continuing,number,cost:cumulative[end]-cumulative[start]});start=end;
+      continuing=false;number++;remaining=budget;
     }
     return actions;
+  }
+  sneakPathCost(token,path,history){
+    if(path.length<2)return 0;
+    const historyCost=history.length?token.measureMovementPath(history).cost:0;
+    return withGreaseMode(token,'sneak',()=>Math.max(0,token.measureMovementPath([...history,...terrainMovementPath(token,path)]).cost-historyCost))+
+      greaseExtraCost(token,path,'sneak');
   }
   async executeSneakActions(token,actions,{valid,data,automaticSneak,sneakLimit}){
     if(!automaticSneak)await this.playerStealth.enableSneak(token);
     if(!valid()||!this.playerStealth.armed(token))return false;
     const seen=new Set();let used=0,completedAll=true;
     for(let index=0;index<actions.length;index++){
-      const expected=position(token.document),planned=actions[index].map((point,i)=>i?point:{...point,...expected});
+      const action=actions[index],expected=position(token.document),planned=action.path.map((point,i)=>i?point:{...point,...expected});
       const atActionOrigin=()=>valid()&&samePosition(position(token.document),expected)&&this.playerStealth.armed(token);
       if(!atActionOrigin()||incapacitationReason(token)||token.actor.hasCondition('prone','grabbed','restrained','immobilized')){completedAll=false;break;}
+      const progress=action.continuing?this.playerStealth.sneakAction(token,{stamp:data.stamp,budget:sneakLimit}):null;
+      if(action.continuing&&!progress){completedAll=false;break;}
+      if(!action.continuing)this.playerStealth.clearSneakAction(token);
       const history=[...(token.document.movementHistory??[])],historyCost=history.length?token.measureMovementPath(history).cost:0;
-      const grease=await prepareGreaseMove(token,planned,{kind:'sneak',valid:atActionOrigin,speed:sneakLimit,
+      const remaining=progress?Math.max(0,sneakLimit-progress.cost):sneakLimit;
+      const grease=await prepareGreaseMove(token,planned,{kind:'sneak',valid:atActionOrigin,speed:remaining,
         baseCost:points=>Math.max(0,token.measureMovementPath([...history,...terrainMovementPath(token,points)]).cost-historyCost)});
-      used++;
       if(grease.note)ui.notifications.info(grease.note);
-      if(grease.blocked){completedAll=false;break;}
-      if(grease.path.length<2){if(grease.fallOnArrival)await finishGreaseFall(token,{valid});completedAll=false;break;}
-      const actionPath=grease.path,traveled=[actionPath[0]];let sneak,landed=false;
-      beginTerrainAction(token,`manual:${data.stamp}:${data.expires}:sneak:${index}`);
+      if(grease.blocked){this.playerStealth.clearSneakAction(token);completedAll=false;break;}
+      if(grease.path.length<2){this.playerStealth.clearSneakAction(token);if(grease.fallOnArrival)await finishGreaseFall(token,{valid});completedAll=false;break;}
+      const actionPath=grease.path,localTraveled=[actionPath[0]],traveled=[...(progress?.traveled??[actionPath[0]])];
+      let sneak=progress?.plan,landed=false,segmentComplete=true;
+      beginTerrainAction(token,`manual:${data.stamp}:${data.expires}:sneak:${action.number}`);
       try{
-        sneak=await this.playerStealth.prepareSneak(token,actionPath,()=>atActionOrigin());
+        if(sneak)await this.playerStealth.continueSneak(token,sneak,[...traveled,...actionPath.slice(1)]);
+        else{sneak=await this.playerStealth.prepareSneak(token,actionPath,()=>atActionOrigin());used++;}
         for(const point of actionPath.slice(1)){
           const before=position(token.document);
           const unchanged=()=>valid()&&samePosition(position(token.document),before)&&this.playerStealth.armed(token);
-          if(!unchanged()||incapacitationReason(token)){completedAll=false;break;}
+          if(!unchanged()||incapacitationReason(token)){segmentComplete=completedAll=false;break;}
           if(this.enabled()){
             const result=await this.reactions.resolveMovement({mover:token,seen,valid:unchanged,applyDamage:true,
               trigger:'leaves a threatened square',reactorFilter:reactor=>this.reactions.automaticReactiveStrike(reactor)});
-            if(result.endTurn){completedAll=false;break;}
+            if(result.endTurn){segmentComplete=completedAll=false;break;}
             if(result.pause||!unchanged()){
               if(result.pauseReason)ui.notifications.warn(result.pauseReason);
-              this.reactions.onPause();completedAll=false;break;
+              this.reactions.onPause();segmentComplete=completedAll=false;break;
             }
           }
-          if(!unchanged()||token.actor.hasCondition('prone','grabbed','restrained','immobilized')){completedAll=false;break;}
+          if(!unchanged()||token.actor.hasCondition('prone','grabbed','restrained','immobilized')){segmentComplete=completedAll=false;break;}
           const completed=await token.document.move([point],{[MANAGED_MOVEMENT]:true,[STEALTH_MOVEMENT]:true,showRuler:false,
             constrainOptions:{ignoreWalls:false,ignoreCost:false,maxCost:historyCost+sneakLimit}});
           await (token.movementAnimationPromise??token.document.movement?.animation?.ended);
           const falling=grease.fallOnArrival&&point===actionPath.at(-1);
           if(falling||token.actor.hasCondition('prone')){
             const landing=await settleGreaseSlip(token,{path:[before,point],fall:Boolean(falling),valid});
-            if(landing.settled){if(falling)await finishGreaseFall(token,{valid});traveled.push(position(token.document));landed=true;completedAll=false;break;}
+            if(landing.settled){if(falling)await finishGreaseFall(token,{valid});const actual=position(token.document);localTraveled.push(actual);traveled.push(actual);landed=true;segmentComplete=completedAll=false;break;}
           }
-          traveled.push(position(token.document));
-          if(!completed||!samePosition(position(token.document),point)){completedAll=false;break;}
+          const actual=position(token.document);localTraveled.push(actual);traveled.push(actual);
+          if(!completed||!samePosition(actual,point)){segmentComplete=completedAll=false;break;}
         }
         await this.onMoveAction(token,{valid});
       }finally{
         if(sneak)await this.playerStealth.finishSneak(token,sneak,traveled);
         endTerrainAction(token);
       }
+      if(segmentComplete&&actionPath.length===planned.length){
+        this.playerStealth.rememberSneakAction(token,{stamp:data.stamp,budget:sneakLimit,number:action.number,
+          cost:(progress?.cost??0)+this.sneakPathCost(token,localTraveled,history),plan:sneak,traveled});
+      }else this.playerStealth.clearSneakAction(token);
       if(landed||!completedAll||actionPath.length<planned.length)break;
     }
     if(used>1)ui.notifications.info(`Sneak used ${used} actions and ${used} secret Stealth checks.`);
@@ -244,9 +264,12 @@ export class ManualMovement {
         const answer=mode==='stride'&&automaticSneak&&token.document._source?.movementAction!=='walk'?'sneak':mode;
         if(answer!=='sneak'&&cost>speed+1e-8)throw new Error('This path exceeds one Stride. Split it into individual move actions.');
         if(answer==='sneak'&&(!player||uncertainTerrain))throw new Error(`Sneak cannot automate this path because its terrain is unsupported.`);
-        const sneakActions=answer==='sneak'?this.sneakActionPaths(token,path,sneakLimit,history):[];
-        if(answer==='sneak'&&game.combat?.started&&sneakActions.length>3)
-          throw new Error(`This path requires ${sneakActions.length} Sneak actions; a combat turn normally has only three.`);
+        if(answer!=='sneak')this.playerStealth?.clearSneakAction(token);
+        const sneakProgress=answer==='sneak'?this.playerStealth.sneakAction(token,{stamp:data.stamp,budget:sneakLimit}):null;
+        const sneakActions=answer==='sneak'?this.sneakActionPaths(token,path,sneakLimit,history,sneakProgress):[];
+        const lastSneakAction=sneakActions.at(-1)?.number??sneakProgress?.number??0;
+        if(answer==='sneak'&&game.combat?.started&&lastSneakAction>3)
+          throw new Error(`This path requires ${lastSneakAction} Sneak actions; a combat turn normally has only three.`);
         if(answer==='step'&&!stepLegal)throw new Error('Step allows one legal 5-foot square and requires Speed 10 feet or more. Check difficult terrain or select Walk.');
         if (!stillAtOrigin() || !['stride', ...(stepLegal ? ['step'] : []), ...(sneakActions.length ? ['sneak'] : [])].includes(answer)) {
           this.reactions.onPause(); return false;

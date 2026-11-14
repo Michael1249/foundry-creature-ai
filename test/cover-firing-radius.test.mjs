@@ -83,8 +83,8 @@ test('hypothetical AI origins and the local indicators use the same directional 
   assert.equal(environmentBetween(f.boss,f.player).coverBonus,2);
   assert.equal(environmentBetween(f.boss,f.player,{origin:{x:300,y:250}}).coverBonus,0);
   f.boss.document.x=250;
-  const awareness=new EnvironmentAwareness();await awareness.schedule();assert.equal(awareness.label(f.player),'');
-  canvas.tokens.controlled=[f.player];await awareness.schedule();assert.equal(awareness.label(f.boss),'Cover +2');
+  const awareness=new EnvironmentAwareness();await awareness.schedule();assert.equal(awareness.label(f.player),'Observed');
+  canvas.tokens.controlled=[f.player];await awareness.schedule();assert.equal(awareness.label(f.boss),'Cover +2\nObserved');
 });
 
 test('native targeted AC rolls use the firing exemption without changing the target actor or unrelated modifiers',()=>{

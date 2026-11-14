@@ -136,7 +136,9 @@ test('sheet Sneak keeps consecutive moves sneaking without a purpose or movement
   assert.equal(f.controller.armed(f.player),true,'the visible mode persists after moving');
   assert.equal(await f.movement.receive(f.data(f.point(700)),game.user),true);
   assert.equal(f.prompts.length,0,'later moves still use the chosen Sneak mode');
-  assert.equal(f.calls.filter(call=>call[0]==='stealth').length,2,'each Sneak action rolls separately');
+  assert.equal(f.calls.filter(call=>call[0]==='stealth').length,1,'separate drags inside one Sneak distance reuse its secret roll');
+  assert.equal(await f.movement.receive(f.data(f.point(800)),game.user),true);
+  assert.equal(f.calls.filter(call=>call[0]==='stealth').length,2,'crossing into the second Sneak distance rolls once more');
   assert.equal(sneakEffects(f.player.actor).length,1);
 });
 
@@ -182,9 +184,9 @@ test('manually controlled NPCs Sneak with the same speed budget, secret roll and
   assert.equal(state(f),'undetected');assert.equal(f.calls.filter(call=>call[0]==='stealth').length,1);assert.equal(f.prompts.length,0);
   assert.equal(perception(f.boss).entries[0].knownPosition.x,500);
   assert.equal(await f.movement.receive(f.data(f.point(900)),game.user),true);
-  assert.equal(f.player.document.x,900);assert.equal(f.calls.filter(call=>call[0]==='stealth').length,3);
-  await assert.rejects(f.movement.receive(f.data(f.point(1600)),game.user),/requires 4 Sneak actions/);
-  assert.equal(f.player.document.x,900);assert.equal(f.calls.filter(call=>call[0]==='stealth').length,3);
+  assert.equal(f.player.document.x,900);assert.equal(f.calls.filter(call=>call[0]==='stealth').length,2);
+  await assert.rejects(f.movement.receive(f.data(f.point(1600)),game.user),/requires 6 Sneak actions/);
+  assert.equal(f.player.document.x,900);assert.equal(f.calls.filter(call=>call[0]==='stealth').length,2);
 });
 
 test('managed NPC AI rolls bypass manual Sneak and manually rebuilt NPC Strikes retain precision context',async()=>{

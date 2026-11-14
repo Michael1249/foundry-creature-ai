@@ -58,9 +58,19 @@ test('movement/selection refresh clears stale captions and native tooltip reads 
   f.boss.checkCollision=()=>{rays++;return true;};
   await awareness.schedule();assert.equal(awareness.label(f.player),'Hidden (LOS blocked)');
   const before=rays;for(let i=0;i<1000;i++)awareness.label(f.player);assert.equal(rays,before);
-  f.boss.checkCollision=()=>false;await awareness.schedule(f.player.id);assert.equal(awareness.label(f.player),'');
+  f.boss.checkCollision=()=>false;await awareness.schedule(f.player.id);assert.equal(awareness.label(f.player),'Observed');
   f.player.actor.conditionsSet.add('invisible');await awareness.schedule(f.player.id);assert.equal(awareness.label(f.player),'Hidden (invisibility)');
-  canvas.tokens.controlled=[f.player];await awareness.schedule();assert.equal(awareness.label(f.boss),'');
+  canvas.tokens.controlled=[f.player];await awareness.schedule();assert.equal(awareness.label(f.boss),'Observed');
+});
+
+test('Observed is explicit and client caption mode can require a configurable held key',async()=>{
+  const f=setup();captionRenderer(canvas.tokens.placeables);let mode='hold';
+  assert.equal(defenseLabel({coverBonus:0,concealed:false},captionDetection(f.boss,f.player)),'Observed');
+  const awareness=new EnvironmentAwareness({captionMode:()=>mode});await awareness.schedule();
+  const caption=awareness.captions.get(f.player);assert.equal(caption.text,'Observed');assert.equal(caption.visible,false);
+  awareness.setCaptionHeld(true);assert.equal(caption.visible,true);
+  awareness.setCaptionHeld(false);assert.equal(caption.visible,false);
+  mode='always';awareness.setCaptionHeld(false);assert.equal(caption.visible,true);
 });
 
 test('player captions never mark an undetected or GM-hidden creature, even if a renderer leaves it visible',async()=>{

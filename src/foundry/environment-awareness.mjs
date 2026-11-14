@@ -41,17 +41,19 @@ export function defenseLabel(environment, detection) {
   return [environment.coverBonus ? `Cover +${environment.coverBonus}` : '',
     environment.concealed ? hidden ? 'Concealed' : 'Concealed (DC 5)' : '',
     hidden ? `${detection.state === 'undetected' ? 'Undetected' : 'Hidden'} (${detection.causes.join('; ')})` : '',
+    detection&&!hidden?'Observed':'',
   ].filter(Boolean).join('\n');
 }
 
 // Client-local, observer-relative display. The tactical text uses cached data
 // only; all geometry work happens on document/selection events, never a ticker.
 export class EnvironmentAwareness {
-  constructor({ query = environmentBetween, enabled = () => true } = {}) {
-    this.query = query; this.enabled = enabled; this.entries = new Map(); this.observer = null; this.sceneId = null;
+  constructor({ query = environmentBetween, enabled = () => true, captionMode=()=> 'always' } = {}) {
+    this.query = query; this.enabled = enabled;this.captionMode=captionMode;this.captionHeld=false; this.entries = new Map(); this.observer = null; this.sceneId = null;
     this.pending = null; this.all = false; this.moved = new Set();
-    this.captions = new TokenCaptions(); this.overlays=new TokenStealthOverlays();this.layouts = new Set(); this.layoutPending = null;
+    this.captions = new TokenCaptions({visible:()=>this.captionMode()==='always'||this.captionHeld}); this.overlays=new TokenStealthOverlays();this.layouts = new Set(); this.layoutPending = null;
   }
+  setCaptionHeld(held){this.captionHeld=Boolean(held);for(const entry of this.entries.values())this.captions.layout(entry.token);return false;}
   clear() {
     this.entries.clear(); this.observer = null; this.sceneId = null;
     this.captions.clear();this.overlays.clear();
@@ -111,5 +113,6 @@ export class EnvironmentAwareness {
   install() {
     const awareness = this;
     globalThis.Hooks?.on('refreshToken',token=>awareness.scheduleLayout(token));
+    globalThis.window?.addEventListener?.('blur',()=>awareness.setCaptionHeld(false));
   }
 }
