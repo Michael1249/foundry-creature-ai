@@ -139,6 +139,33 @@ export function hiddenToUser(subject, user = game.user) {
     observer.actor.testUserPermission?.(user, 'OWNER') && detectionFor(observer, subject).state === 'hidden');
 }
 
+// Foundry's vision polygons originate at a token's center. The table's wall
+// policy instead permits sight from any footprint sample, so a creature can be
+// Observed around a corner while Foundry's center ray still rejects its mesh.
+// Preserve Foundry's detection mode, range, facing, lighting, invisibility and
+// level checks; only replace the already-adjudicated wall LOS result.
+function detectableFromOwnedCorner(subject, user, points) {
+  if (user.isGM || typeof canvas.visibility?._createVisibilityTestConfig !== 'function') return false;
+  const modes = globalThis.CONFIG?.Canvas?.detectionModes;
+  if (!modes) return false;
+  for (const source of canvas.effects?.visionSources ?? []) {
+    const observer = source.object;
+    if (!source.active || !observer?.actor || observer === subject ||
+      !observer.actor.testUserPermission?.(user, 'OWNER') || !clearSightPath(observer, subject)) continue;
+    const configured = observer.document?.detectionModes ?? {};
+    const ids = ['basicSight','lightPerception',...Object.keys(configured).filter(id=>!['basicSight','lightPerception'].includes(id))];
+    for (const id of ids) {
+      const mode = configured[id], detector = modes[id];
+      if (!mode || !detector?.testVisibility) continue;
+      const config = canvas.visibility._createVisibilityTestConfig(points,{tolerance:0,object:subject});
+      const tests = config.tests.filter(test => typeof detector._testAngle !== 'function' || detector._testAngle(source,mode,subject,test));
+      for (const test of tests) test.los.set(source,true);
+      if (tests.length && detector.testVisibility(source,mode,{...config,tests})) return true;
+    }
+  }
+  return false;
+}
+
 // Foundry's native token test can miss a creature when its center is behind a
 // wall even though one footprint corner is inside a real vision polygon. Test
 // the same footprint intersections used by the cover rules through Foundry's
@@ -149,7 +176,8 @@ export function cornerVisibleToUser(subject, user = game.user) {
   if (!subject || subject.isPreview || subject.isFilteredOut || subject.document.hidden && !user.isGM) return false;
   if (!canvas.visibility?.tokenVision || !canvas.effects?.visionSources?.some(source => source.active)) return false;
   const points = footprintRayPoints(subject, 'sight');
-  return points.length > 0 && canvas.visibility.testVisibility(points, { tolerance: 0, object: subject });
+  return points.length > 0 && (canvas.visibility.testVisibility(points, { tolerance: 0, object: subject }) ||
+    detectableFromOwnedCorner(subject,user,points));
 }
 
 const escape = value => String(value).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));

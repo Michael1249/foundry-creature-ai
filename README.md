@@ -1,6 +1,8 @@
 # Foundry creature AI
 
-**Patch 0.43.20:** renders a creature whose square is known as Hidden to one of the player's owned observers even through a fully blocking wall. Observer-relative and explicit Undetected/Unnoticed states suppress the token for non-owners, even when Foundry would otherwise render it. GM-hidden tokens remain hidden from players. [Stealth and corner visibility](docs/stealth-corner-visibility-0.43.11.md). Reload clients with **Ctrl+F5**.
+**Patch 0.43.21:** renders an Observed target when the campaign's footprint-corner wall test succeeds but Foundry's center-origin vision polygon remains blocked. The fallback retains Foundry's detection mode, range, facing, lighting, invisibility, and level checks; it replaces only the wall LOS result. [Stealth and corner visibility](docs/stealth-corner-visibility-0.43.11.md). Reload clients with **Ctrl+F5**.
+
+**Patch 0.43.20:** renders a creature whose square is known as Hidden to one of the player's owned observers even through a fully blocking wall. Observer-relative and explicit Undetected/Unnoticed states suppress the token for non-owners, even when Foundry would otherwise render it. GM-hidden tokens remain hidden from players. [Stealth and corner visibility](docs/stealth-corner-visibility-0.43.11.md).
 
 **Patch 0.43.19:** revises native-wall footprint cover: zero visible target corners blocks line of sight, one visible corner grants standard cover (+2), every other partial view grants lesser cover (+1), and only all visible corners remove cover. Explicit cover Regions keep their configured lesser, standard, or greater value. [Stealth and corner visibility](docs/stealth-corner-visibility-0.43.11.md).
 

@@ -233,6 +233,30 @@ test('Hidden known squares render through walls while Undetected subjects do not
   game.user=gm;
 });
 
+test('an Observed target renders when footprint-corner sight succeeds but Foundry center sight fails',async()=>{
+  const f=fixture({footprint:1});let wrapper;
+  globalThis.libWrapper={register:(_id,path,fn)=>{assert.equal(path,'CONFIG.Token.objectClass.prototype.isVisible');wrapper=fn;}};
+  installStealthVisibility();f.player.actor.testUserPermission=user=>user.id==='player';
+  f.player.document.detectionModes={basicSight:{enabled:true,range:Infinity}};
+  const source={active:true,object:f.player,data:{angle:360,x:f.player.center.x,y:f.player.center.y,elevation:0}};
+  let preserved={range:false,lighting:false,angle:false,target:false},detectable=true;
+  globalThis.CONFIG??={};const previousCanvas=CONFIG.Canvas;CONFIG.Canvas={detectionModes:{basicSight:{
+    _testAngle:(actual,mode,target)=>{preserved.angle=actual===source&&mode===f.player.document.detectionModes.basicSight&&target===f.boss;return true;},
+    testVisibility:(actual,mode,config)=>{preserved.range=mode.range===Infinity;preserved.lighting=true;preserved.target=config.object===f.boss;
+      return detectable&&actual===source&&config.tests.some(test=>test.los.get(source)===true);},
+  }}};
+  canvas.effects={visionSources:[source]};canvas.visibility={tokenVision:true,testVisibility:()=>false,
+    _createVisibilityTestConfig:(points,{object})=>({object,level:{isView:true},tests:points.map(point=>({point,level:{isView:true},los:new Map()}))})};
+  const gm=game.user;game.user={id:'player',isGM:false};
+  assert.equal(detectionFor(f.player,f.boss).state,'observed');
+  assert.equal(wrapper.call(f.boss,()=>false),true);
+  assert.deepEqual(preserved,{range:true,lighting:true,angle:true,target:true});
+  detectable=false;assert.equal(wrapper.call(f.boss,()=>false),false,'Foundry detection, range and lighting gates stay authoritative');detectable=true;
+  f.player.checkCollision=()=>true;
+  assert.equal(wrapper.call(f.boss,()=>false),false,'the fallback cannot render through fully blocked corner sight');
+  game.user=gm;CONFIG.Canvas=previousCanvas;
+});
+
 test('Alt+W recognizes the scout and consumes shared terrain/detection APIs without installing manual hooks',async()=>{
   const f=fixture(),hooks=new Map(),wrappers=[];
   globalThis.Hooks={once:(id,fn)=>hooks.set(id,fn),on:(id,fn)=>hooks.set(id,fn)};

@@ -1,0 +1,41 @@
+{
+  "version": "0.43.21",
+  "date": "2026-11-15",
+  "problem": "The table's observer-corner LOS could change a target to Observed while Foundry's center-origin vision polygon still kept the token mesh invisible.",
+  "resolution": {
+    "wallGeometry": "Use the campaign footprint-corner LOS result for owned observer vision sources.",
+    "preservedFoundryChecks": [
+      "detection mode",
+      "range",
+      "facing angle",
+      "lighting",
+      "invisibility and other detectable-state gates",
+      "scene level"
+    ],
+    "undetected": "Observer-relative and explicit Undetected or Unnoticed states remain suppressed for non-owners.",
+    "gmHidden": "The GM-hidden token toggle remains authoritative for players."
+  },
+  "verification": {
+    "tests": {
+      "command": "npm test",
+      "files": 97,
+      "cases": 1231,
+      "passed": 1231,
+      "failed": 0
+    },
+    "release": {
+      "archive": "releases/pf2e-tactical-suite-0.43.21.zip",
+      "bytes": 719046,
+      "sha256": "7d445d9d77bd940e09952fbebd8208bb75802e69cbe05c55d6fd2b7bb45d64a1"
+    },
+    "installation": {
+      "packages": 5,
+      "installedVersion": "0.43.21",
+      "foundryPid": 25472,
+      "foundryResponding": true,
+      "manifestHttpStatus": 200,
+      "serverRestarted": false,
+      "clientReloadRequired": "Ctrl+F5"
+    }
+  }
+}

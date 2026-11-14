@@ -1,4 +1,4 @@
-# Stealth and footprint-corner visibility — 0.43.20
+# Stealth and footprint-corner visibility — 0.43.21
 
 ## Detection progression
 
@@ -27,6 +27,6 @@ The sight calculation is used for wall visibility, wall-derived cover, Hide elig
 
 Complete obstruction can prevent precise sight, but partial cover never changes Observed to Hidden automatically. The creature must successfully Hide before it can Sneak to Undetected.
 
-For display, the module feeds all target footprint intersections into Foundry's native vision engine. A token therefore remains renderable when at least one corner is genuinely visible even if its center is behind a wall. A relative Hidden result represents a known square and remains rendered for the owning player even when a wall blocks every corner; it also adds a local copy of PF2e's Hidden overlay. Relative or explicit Undetected/Unnoticed suppresses the token for non-owners. GM-hidden tokens remain hidden from players. These display rules do not add Actor conditions or disclose observer-relative results to other clients.
+For display, the module feeds all target footprint intersections into Foundry's native vision engine. Foundry normally casts those visibility rays from the observer's center, while this table policy permits a ray from any observer footprint sample. If the table's corner-to-corner wall test succeeds but the center-origin polygon does not, the module substitutes only the wall LOS result and retains Foundry's detection mode, range, facing, lighting, invisibility, and scene-level checks. A relative Hidden result represents a known square and remains rendered for the owning player even when a wall blocks every corner; it also adds a local copy of PF2e's Hidden overlay. Relative or explicit Undetected/Unnoticed suppresses the token for non-owners. GM-hidden tokens remain hidden from players. These display rules do not add Actor conditions or disclose observer-relative results to other clients.
 
 Rules references: [Detecting Creatures](https://2e.aonprd.com/Rules.aspx?ID=2414), [Hide](https://2e.aonprd.com/Actions.aspx?ID=2404), [Sneak](https://2e.aonprd.com/Actions.aspx?ID=2405), [Cover](https://2e.aonprd.com/Rules.aspx?ID=2372).
