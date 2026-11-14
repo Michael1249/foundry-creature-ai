@@ -1,0 +1,36 @@
+{
+  "version": "0.43.14",
+  "date": "2026-11-14",
+  "policies": {
+    "hideEligibility": "Every positive cover bonus permits Hide. Lesser cover grants no Stealth circumstance bonus.",
+    "manualSneak": "Measured movement cost is partitioned into per-action Sneak budgets; each budget spends one action and rolls one secret Stealth check.",
+    "combatLimit": "A manual path requiring more than three Sneak actions is rejected because extra-action permissions cannot be inferred.",
+    "stateCarryover": "Every Sneak action starts from the prior action's observer-relative result; a later success cannot improve Observed to Undetected without Hide.",
+    "cornerRendering": "Exact footprint intersections are submitted to Foundry's native visibility engine so one visible corner can render a greater-cover token while native lighting, range and detection modes remain authoritative.",
+    "hiddenAppearance": "Observer-relative Hidden uses a client-local PF2e Hidden overlay and does not create a global Actor condition."
+  },
+  "tests": {
+    "fullPassed": 1222,
+    "failed": 0,
+    "testFiles": 97,
+    "parallelProcesses": 11,
+    "elapsedSeconds": 29.0,
+    "focusedPassed": 145
+  },
+  "artifact": {
+    "archive": "releases/pf2e-tactical-suite-0.43.14.zip",
+    "archiveBytes": 715053,
+    "sha256": "620C6F1314B47BDC17D75634D77C4A3848E0D65115E1689B82757C1B39210E62",
+    "packages": 5,
+    "installedPath": "C:/Users/Roman/AppData/Local/FoundryVTT/Data/modules",
+    "installedVersion": "0.43.14"
+  },
+  "native": {
+    "worldDatabaseChanged": false,
+    "browserReloadRequired": true,
+    "foundryRestartRequired": false,
+    "foundryProcessPreserved": true,
+    "httpStatusAfterInstall": 200,
+    "liveReplayPending": true
+  }
+}

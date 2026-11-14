@@ -1,4 +1,4 @@
-import { clearSightPath, footprintVisibility } from './attack-path.mjs';
+import { clearSightPath, footprintRayPoints, footprintVisibility } from './attack-path.mjs';
 import { environmentBetween } from './environment-zones.mjs';
 import { checkDegree } from '../framework/math.mjs';
 import { hasStealthConcealment } from './zone-concealment.mjs';
@@ -112,6 +112,19 @@ export function visibleToUser(subject, user = game.user) {
   return observers.some(observer => detectionFor(observer, subject).state !== 'undetected');
 }
 
+// Foundry's native token test can miss a creature when its center is behind a
+// wall even though one footprint corner is inside a real vision polygon. Test
+// the same footprint intersections used by the cover rules through Foundry's
+// visibility engine, which preserves lighting, vision range and detection
+// modes. This is a render-only correction; observer-relative Undetected and GM
+// token hiding are still enforced separately.
+export function cornerVisibleToUser(subject, user = game.user) {
+  if (!subject || subject.isPreview || subject.isFilteredOut || subject.document.hidden && !user.isGM) return false;
+  if (!canvas.visibility?.tokenVision || !canvas.effects?.visionSources?.some(source => source.active)) return false;
+  const points = footprintRayPoints(subject, 'sight');
+  return points.length > 0 && canvas.visibility.testVisibility(points, { tolerance: 0, object: subject });
+}
+
 const escape = value => String(value).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 export async function openStealthControls(subject = canvas.tokens.controlled[0]) {
   if (!game.user.isGM || !subject || !game.combat?.started) throw new Error('Select one creature in an active combat as GM');
@@ -135,6 +148,6 @@ export function installStealthVisibility({packageId=namespace}={}) {
   // Use the native visibility getter so Foundry also updates the primary-group
   // token mesh, hit testing, auras and other renderers that inspect visibility.
   libWrapper.register(packageId, 'CONFIG.Token.objectClass.prototype.isVisible', function (wrapped) {
-    return wrapped() && visibleToUser(this);
+    return (wrapped() || cornerVisibleToUser(this)) && visibleToUser(this);
   }, 'WRAPPER');
 }

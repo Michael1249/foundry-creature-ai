@@ -10,13 +10,13 @@ import { sneakEffects, setSneakMode } from '../src/foundry/sneak-mode.mjs';
 
 const ns='foundry-creature-ai';
 function setup({die=15,answer='sneak'}={}){
-  const f=fixture();let next=0;
+  const f=fixture();let next=0,dice=Array.isArray(die)?[...die]:null;
   game.user.active=true;game.users.activeGM=game.user;game.messages=new Map();
   f.combat.turn=1;f.combat.combatant=f.combat.combatants[1];
   f.player.actor.system.attributes.speed={total:25};f.player.actor.testUserPermission=user=>user.id==='owner';
   const get=f.player.actor.getStatistic;
   f.player.actor.getStatistic=slug=>slug!=='stealth'?get(slug):{check:{modifiers:[],roll:async options=>{
-    f.calls.push(['stealth',options]);return {total:die+7,dice:[{faces:20,total:die}]};
+    const result=dice?.length?dice.shift():die;f.calls.push(['stealth',options]);return {total:result+7,dice:[{faces:20,total:result}]};
   }}};
   canvas.tokens.controlled=[f.player];
   for(const token of canvas.tokens.placeables)token.document.object=token;
@@ -159,8 +159,8 @@ test('native path cost includes alternating diagonals in the half-Speed budget',
   for(const swift of [false,true]){
     const f=setup();fog();await hidden(f);
     if(swift)f.player.actor.items.set('swift',{type:'feat',slug:'swift-sneak'});
-    if(swift)assert.equal(await f.movement.receive(f.data(f.point(700,400)),game.user),true);
-    else await assert.rejects(f.movement.receive(f.data(f.point(700,400)),game.user),/Sneak allows/);
+    assert.equal(await f.movement.receive(f.data(f.point(700,400)),game.user),true);
+    assert.equal(f.calls.filter(call=>call[0]==='stealth').length,swift?1:2);
     assert.equal(f.prompts.length,0);
   }
 });
@@ -181,8 +181,10 @@ test('manually controlled NPCs Sneak with the same speed budget, secret roll and
   assert.equal(await f.movement.receive(f.data(f.point(600)),game.user),true);
   assert.equal(state(f),'undetected');assert.equal(f.calls.filter(call=>call[0]==='stealth').length,1);assert.equal(f.prompts.length,0);
   assert.equal(perception(f.boss).entries[0].knownPosition.x,500);
-  await assert.rejects(f.movement.receive(f.data(f.point(900)),game.user),/Sneak path exceeds/);
-  assert.equal(f.player.document.x,600);assert.equal(f.calls.filter(call=>call[0]==='stealth').length,1);
+  assert.equal(await f.movement.receive(f.data(f.point(900)),game.user),true);
+  assert.equal(f.player.document.x,900);assert.equal(f.calls.filter(call=>call[0]==='stealth').length,3);
+  await assert.rejects(f.movement.receive(f.data(f.point(1600)),game.user),/requires 4 Sneak actions/);
+  assert.equal(f.player.document.x,900);assert.equal(f.calls.filter(call=>call[0]==='stealth').length,3);
 });
 
 test('managed NPC AI rolls bypass manual Sneak and manually rebuilt NPC Strikes retain precision context',async()=>{
@@ -250,18 +252,26 @@ test('invisibility retains Hidden after a critically failed Sneak',async()=>{
   await f.movement.receive(f.data(f.point(600)),game.user);assert.equal(state(f),'hidden');
 });
 
-test('native Sneak rejects a path exceeding half Speed without moving or rolling',async()=>{
+test('native Sneak divides a longer path into movement budgets with one secret roll per action',async()=>{
   const f=setup();fog();await hidden(f);
-  await assert.rejects(f.movement.receive(f.data(f.point(800)),game.user),/Sneak allows/);
+  assert.equal(await f.movement.receive(f.data(f.point(800)),game.user),true);
   assert.equal(f.prompts.length,0);
-  assert.equal(f.player.document.x,500);assert.equal(f.calls.some(c=>c[0]==='stealth'),false);
+  assert.equal(f.player.document.x,800);assert.equal(f.calls.filter(c=>c[0]==='stealth').length,2);
+  assert.ok(f.notices.some(message=>message.includes('2 actions')&&message.includes('2 secret Stealth checks')));
 });
 
-test('armed Sneak skips the duplicate movement prompt, but an excessive path is rejected without movement',async()=>{
+test('each Sneak action starts from the previous secret result instead of improving an Observed failure',async()=>{
+  const f=setup({die:[1,20]});fog();await hidden(f);
+  assert.equal(await f.movement.receive(f.data(f.point(800)),game.user),true);
+  assert.equal(f.calls.filter(c=>c[0]==='stealth').length,2);assert.equal(state(f),'observed');
+});
+
+test('armed Sneak skips the duplicate movement prompt and rejects paths needing more than three combat actions',async()=>{
   const f=setup();fog();await hidden(f);await f.controller.request('arm-sneak');
-  await assert.rejects(f.movement.receive(f.data(f.point(800)),game.user),/Sneak path exceeds/);
+  await assert.rejects(f.movement.receive(f.data(f.point(1200)),game.user),/requires 4 Sneak actions/);
   assert.equal(f.controller.armed(f.player),true);assert.equal(f.calls.some(c=>c[0]==='stealth'),false);
-  assert.equal(await f.movement.receive(f.data(f.point(600)),game.user),true);
+  assert.equal(await f.movement.receive(f.data(f.point(800)),game.user),true);
+  assert.equal(f.calls.filter(c=>c[0]==='stealth').length,2);
   assert.equal(f.prompts.length,0);assert.equal(f.controller.armed(f.player),true);
 });
 
@@ -275,12 +285,14 @@ test('Sneak creates one removable native effect with a token icon without changi
 
 test('persistent Sneak rechecks Swift Sneak when feats change between moves',async()=>{
   const f=setup();fog();await hidden(f);await f.controller.request('arm-sneak');
-  await assert.rejects(f.movement.receive(f.data(f.point(800)),game.user),/Sneak path exceeds/);
-  f.player.actor.items.set('swift',{type:'feat',slug:'swift-sneak'});
   assert.equal(await f.movement.receive(f.data(f.point(800)),game.user),true);
+  assert.equal(f.calls.filter(c=>c[0]==='stealth').length,2);
+  f.player.actor.items.set('swift',{type:'feat',slug:'swift-sneak'});
+  assert.equal(await f.movement.receive(f.data(f.point(1100)),game.user),true);
+  assert.equal(f.calls.filter(c=>c[0]==='stealth').length,3);
   f.player.actor.items.delete('swift');
-  await assert.rejects(f.movement.receive(f.data(f.point(1100)),game.user),/Sneak path exceeds/);
-  assert.equal(f.controller.armed(f.player),true);assert.equal(f.player.document.x,800);
+  await assert.rejects(f.movement.receive(f.data(f.point(1800)),game.user),/requires 4 Sneak actions/);
+  assert.equal(f.controller.armed(f.player),true);assert.equal(f.player.document.x,1100);
 });
 
 test('persistent Sneak rechecks Legendary Sneak instead of keeping an old cover exemption',async()=>{

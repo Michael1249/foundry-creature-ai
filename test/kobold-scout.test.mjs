@@ -203,6 +203,19 @@ test('relative visibility wraps the native getter and suppresses movement rulers
   assert.equal(moveOptions.showRuler,false);assert.equal(detectionFor(f.player,f.boss).state,'undetected');
 });
 
+test('relative visibility keeps a token renderable when Foundry sees a footprint corner but not its center',async()=>{
+  const f=fixture({footprint:1});fog(f);await rollStealth(f.boss,'hide');
+  let wrapper;globalThis.libWrapper={register:(_id,path,fn)=>{assert.equal(path,'CONFIG.Token.objectClass.prototype.isVisible');wrapper=fn;}};
+  installStealthVisibility();f.player.actor.testUserPermission=user=>user.id==='player';
+  const saved=stealthRecord(f.boss);await f.boss.document.setFlag(MODULE_ID,'stealth',{...saved,entries:saved.entries.map(entry=>({...entry,state:'hidden'}))});
+  let tested=[];canvas.visibility={tokenVision:true,testVisibility:(points,{object,tolerance})=>{tested=points;assert.equal(object,f.boss);assert.equal(tolerance,0);return true;}};
+  canvas.effects={visionSources:[{active:true}]};
+  const gm=game.user;game.user={id:'player',isGM:false};
+  assert.equal(wrapper.call(f.boss,()=>false),true);assert.equal(tested.length,4);
+  f.boss.document.hidden=true;assert.equal(wrapper.call(f.boss,()=>false),false,'GM-hidden tokens remain hidden from players');
+  game.user=gm;
+});
+
 test('Alt+W recognizes the scout and consumes shared terrain/detection APIs without installing manual hooks',async()=>{
   const f=fixture(),hooks=new Map(),wrappers=[];
   globalThis.Hooks={once:(id,fn)=>hooks.set(id,fn),on:(id,fn)=>hooks.set(id,fn)};

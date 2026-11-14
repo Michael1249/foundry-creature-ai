@@ -77,7 +77,7 @@ export function environmentBetween(observer, target, { origin, destination, scen
     coverBonus = Math.max(coverBonus, bonus); concealed ||= Boolean(obscures);
   }
   if(target.actor?.flags?.['foundry-creature-ai']?.revealed)concealed=Boolean(target.actor.hasCondition('invisible'));
-  return { coverBonus, concealed, flatCheckDC: concealed ? 5 : null, canHide: coverBonus >= 2 || concealed,
+  return { coverBonus, concealed, flatCheckDC: concealed ? 5 : null, canHide: coverBonus > 0 || concealed,
     stealthBonus: coverBonus >= 2 ? coverBonus : 0, sources };
 }
 
@@ -133,7 +133,7 @@ export async function openZones(regionId) {
       <div class="form-group"><label>Region</label><select name="region">${options(Object.fromEntries(regions.map(region => [region.id, `${region.name}${zoneConfig(region) ? ' (configured)' : ''}`])), selected.id)}</select></div>
       <p>To edit a different region's existing values, select it and click <strong>Load region</strong> first.</p>
       <div class="form-group"><label>Enabled</label><input name="enabled" type="checkbox" ${config.enabled ? 'checked' : ''}></div>
-      <div class="form-group"><label>Cover</label><select name="cover">${options({ none: 'None', lesser: 'Lesser (+1 AC; cannot Hide)', standard: 'Standard (+2 AC and Stealth)', greater: 'Greater (+4 AC and Stealth)' }, config.cover)}</select></div>
+      <div class="form-group"><label>Cover</label><select name="cover">${options({ none: 'None', lesser: 'Lesser (+1 AC; permits Hide)', standard: 'Standard (+2 AC and Stealth)', greater: 'Greater (+4 AC and Stealth)' }, config.cover)}</select></div>
       <input name="coverMode" type="hidden" value="${escape(config.coverMode)}">
       <p>Cover applies when the sight-height line enters or crosses this Region, including when the target is inside it. It changes attack defense and Hide eligibility but does not block visibility; use Foundry walls for that.</p>
       <div class="form-group"><label>Firing radius (ft)</label><input name="firingRadius" type="number" min="0" step="any" required value="${config.firingRadius}"></div>

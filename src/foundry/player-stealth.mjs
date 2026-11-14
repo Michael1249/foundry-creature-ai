@@ -154,7 +154,7 @@ export class PlayerStealth {
   async open(token=canvas.tokens.controlled[0]){
     if(!this.supports(token))throw new Error('Select a creature token you own first');
     const action=await foundry.applications.api.DialogV2.wait({window:{title:`Stealth — ${token.name}`},
-      content:`<p>Hide resolves one secret Stealth check against each enemy. Start Sneak adds a visible effect; ground movements use Sneak until you remove it. Each movement spends one action and rolls separately. Stop Sneak removes the effect without changing enemy detection. Reveal ends ordinary hiding and also stops Sneak.</p><p>Sneak is currently <strong>${this.armed(token)?'on':'off'}</strong>.</p>`,
+      content:`<p>Hide resolves one secret Stealth check against each enemy. Start Sneak adds a visible effect; ground movements use Sneak until you remove it. Movement distance is divided into Sneak action budgets, and every action rolls separately. Stop Sneak removes the effect without changing enemy detection. Reveal ends ordinary hiding and also stops Sneak.</p><p>Sneak is currently <strong>${this.armed(token)?'on':'off'}</strong>.</p>`,
       buttons:[{action:'hide',label:'Hide',default:true},this.armed(token)?{action:'stop-sneak',label:'Stop Sneak'}:{action:'arm-sneak',label:'Start Sneak'},
         {action:'reveal',label:'Reveal / stop Sneak'}],rejectClose:false});
     if(action)await this.request(action,token);

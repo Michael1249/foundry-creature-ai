@@ -1,7 +1,7 @@
 import { environmentBetween } from './environment-zones.mjs';
 import { detectionFor } from './stealth-awareness.mjs';
 import { clearSightPath } from './attack-path.mjs';
-import {TokenCaptions} from './token-captions.mjs';
+import {TokenCaptions,TokenStealthOverlays} from './token-captions.mjs';
 
 export const TOKEN_GEOMETRY_FIELDS = ['x', 'y', 'elevation', 'level', 'width', 'height', 'depth', 'shape', 'hidden', 'actorId', 'actorLink'];
 
@@ -50,11 +50,11 @@ export class EnvironmentAwareness {
   constructor({ query = environmentBetween, enabled = () => true } = {}) {
     this.query = query; this.enabled = enabled; this.entries = new Map(); this.observer = null; this.sceneId = null;
     this.pending = null; this.all = false; this.moved = new Set();
-    this.captions = new TokenCaptions(); this.layouts = new Set(); this.layoutPending = null;
+    this.captions = new TokenCaptions(); this.overlays=new TokenStealthOverlays();this.layouts = new Set(); this.layoutPending = null;
   }
   clear() {
     this.entries.clear(); this.observer = null; this.sceneId = null;
-    this.captions.clear();
+    this.captions.clear();this.overlays.clear();
   }
   refreshLabel(token) {
     this.captions.update(token,this.label(token));
@@ -66,13 +66,13 @@ export class EnvironmentAwareness {
     // Only placement follows final native elevation text. Caption text stays
     // untouched through the entire render cycle; no geometry or render flags.
     this.layoutPending=Promise.resolve().then(()=>{
-      for(const token of this.layouts)this.captions.layout(token);
+      for(const token of this.layouts){this.captions.layout(token);this.overlays.layout(token);}
       this.layouts.clear();this.layoutPending=null;
     });
     return this.layoutPending;
   }
   label(token) { return this.entries.get(token.id)?.label ?? ''; }
-  refresh({ moved = [], all = true } = {}) {
+  async refresh({ moved = [], all = true } = {}) {
     if (!canvas.ready || !this.enabled()) { this.clear(); return; }
     const observer = environmentObserver(), sceneId = canvas.scene.id;
     if (observer !== this.observer || sceneId !== this.sceneId) { this.clear(); all = true; }
@@ -81,7 +81,8 @@ export class EnvironmentAwareness {
     const changed = new Set(moved);
     if (changed.has(observer.id)) all = true;
     const tokens = canvas.tokens.placeables, ids = new Set(tokens.map(token => token.id));
-    for (const [id,entry] of this.entries) if (!ids.has(id)) {this.captions.remove(entry.token);this.entries.delete(id);}
+    for (const [id,entry] of this.entries) if (!ids.has(id)) {this.captions.remove(entry.token);this.overlays.remove(entry.token);this.entries.delete(id);}
+    const appearances=[];
     for (const token of tokens) {
       if (token === observer) continue;
       if (!all && !changed.has(token.id)) continue;
@@ -94,14 +95,16 @@ export class EnvironmentAwareness {
       const label = environment ? defenseLabel(environment, detection) : '';
       this.entries.set(token.id, { token, environment, detection, label });
       this.refreshLabel(token);
+      appearances.push(this.overlays.update(token,Boolean(detection?.state==='hidden'&&detection.causes.includes('stealth'))));
     }
+    await Promise.all(appearances);
   }
   schedule(tokenId) {
     if (tokenId) this.moved.add(tokenId); else this.all = true;
     if (this.pending) return this.pending;
     this.pending = Promise.resolve().then(() => {
       const all = this.all, moved = [...this.moved]; this.all = false; this.moved.clear();
-      this.refresh({ all, moved });
+      return this.refresh({ all, moved });
     }).finally(() => { this.pending = null; });
     return this.pending;
   }

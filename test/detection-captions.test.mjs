@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { fixture } from './helpers/ogre-fixture.mjs';
 import { captionDetection, defenseLabel, EnvironmentAwareness } from '../src/foundry/environment-awareness.mjs';
+import {captionRenderer} from './helpers/caption-renderer.mjs';
 
 const ns='foundry-creature-ai';
 function setup() {
@@ -82,4 +83,18 @@ test('recorded stealth revealed by clear LOS without cover is no longer captione
   const f=setup();f.setStealth('hidden');
   f.flags.get(`token-fighter:${ns}:stealth`).moving=false;
   assert.equal(captionDetection(f.boss,f.player).state,'observed');
+});
+
+test('observer-relative Hidden uses a client-local PF2e-style overlay and removes it when observed',async()=>{
+  const f=setup();captionRenderer(canvas.tokens.placeables);f.setStealth('hidden');
+  class Sprite{
+    constructor(texture){this.texture=texture;this.anchor={set:(x,y)=>{this.anchorValue=[x,y];}};this.position={set:(x,y)=>{this.positionValue=[x,y];}};}
+    destroy(){this.parent?.removeChild(this);this.destroyed=true;}
+  }
+  PIXI.Sprite=Sprite;globalThis.loadTexture=async path=>{assert.equal(path,'systems/pf2e/icons/conditions/hidden.webp');return {path};};
+  const awareness=new EnvironmentAwareness();await awareness.schedule();
+  const overlay=awareness.overlays.get(f.player);assert.ok(overlay);assert.equal(overlay.alpha,0.8);assert.equal(overlay.width,60);
+  assert.deepEqual(overlay.anchorValue,[0.5,0.5]);assert.deepEqual(overlay.positionValue,[50,50]);
+  f.setStealth('observed');await awareness.schedule(f.player.id);
+  assert.equal(awareness.overlays.get(f.player),undefined);assert.equal(overlay.destroyed,true);
 });

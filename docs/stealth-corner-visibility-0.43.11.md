@@ -2,7 +2,7 @@
 
 ## Detection progression
 
-Detection is relative to each observer and defaults to **Observed**. Cover, greater cover, concealment, or another valid visual protection permits a creature to **Hide**; the protection alone does not make it Hidden. A successful Hide changes Observed to **Hidden** for that observer.
+Detection is relative to each observer and defaults to **Observed**. Any positive cover bonus, concealment, or another valid visual protection permits a creature to **Hide**; the protection alone does not make it Hidden. Lesser cover permits Hide without a Stealth circumstance bonus. A successful Hide changes Observed to **Hidden** for that observer.
 
 **Sneak cannot improve an Observed state.** It checks only observers for whom the creature was Hidden or Undetected when that Sneak began. Against an eligible observer, a successful Sneak makes the creature Undetected, a failure leaves it Hidden, and a critical failure makes it Observed. The endpoint must still provide valid protection unless a rule such as Legendary Sneak removes that requirement.
 
@@ -24,5 +24,7 @@ PF2e's published default cover procedure draws a line between creature centers. 
 The sight calculation is used for wall visibility, wall-derived cover, Hide eligibility, continuous cover during Sneak, captions, reactions, and AI decisions. Physical attack paths use the same footprint sampling with movement collision so a transparent solid barrier can still stop an attack. Explicit cover/concealment Regions remain a separate sight-height line test and combine by using the highest applicable cover bonus.
 
 Complete obstruction can prevent precise sight, but partial cover never changes Observed to Hidden automatically. The creature must successfully Hide before it can Sneak to Undetected.
+
+For display, the module feeds all target footprint intersections into Foundry's native vision engine. A token therefore remains renderable when at least one corner is genuinely visible even if its center is behind a wall. Foundry still decides lighting, range, vision sources and special detection. A relative Hidden result adds a local copy of PF2e's Hidden overlay for the selected observer; it does not add an Actor condition or disclose that result to other clients.
 
 Rules references: [Detecting Creatures](https://2e.aonprd.com/Rules.aspx?ID=2414), [Hide](https://2e.aonprd.com/Actions.aspx?ID=2404), [Sneak](https://2e.aonprd.com/Actions.aspx?ID=2405), [Cover](https://2e.aonprd.com/Rules.aspx?ID=2372).

@@ -10,7 +10,7 @@ export const sneakMode=token=>sneakEffects(token?.actor).some(effect=>effect.isE
 
 function effectData(actor){
   return {name:'Sneak',type:'effect',img:'icons/svg/mystery-man.svg',
-    system:{slug:'creature-ai-sneak',description:{value:'<p>Your ground movements use Sneak automatically while this effect is active. Each move is a separate one-action Sneak with a new secret Stealth check.</p><p>Move up to half your Speed, or full Speed with Swift Sneak. Start hidden or undetected from the observer and finish with cover or concealment. Legendary Sneak removes the cover/concealment requirement.</p><p>Remove this effect from your Effects panel or sheet, or use Stop Sneak in Player Hide / Sneak, to return to normal movement. Removing the effect does not itself reveal you or spend an action.</p>'},
+    system:{slug:'creature-ai-sneak',description:{value:'<p>Your ground movements use Sneak automatically while this effect is active. The measured distance is divided into Sneak action budgets; each action makes a new secret Stealth check.</p><p>Move up to half your Speed per action, or full Speed with Swift Sneak. Start hidden or undetected from the observer and finish with cover or concealment. Legendary Sneak removes the cover/concealment requirement.</p><p>Remove this effect from your Effects panel or sheet, or use Stop Sneak in Player Hide / Sneak, to return to normal movement. Removing the effect does not itself reveal you or spend an action.</p>'},
       duration:{unit:'unlimited',value:-1,expiry:null,sustained:false},level:{value:actor.level??0},
       tokenIcon:{show:true},traits:{value:[]},rules:[]},
     flags:{[ns]:{sneakMode:{source,version:1}}}};

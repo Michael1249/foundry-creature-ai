@@ -6,7 +6,7 @@ From **0.39.0**, the [table's compulsion and fascination policy](condition-prece
 
 ## Movement
 
-Choose **Step** or **Sneak** from the token's normal Foundry movement-mode menu. Normal Walk means Stride. The former Stride/Sneak/Step popup is removed. Step validates one 5-foot square, Speed of at least 10 feet, native terrain cost and supported scene terrain; it avoids movement reactions. Sneak validates the native path cost against half Speed, or full Speed with Swift/Legendary Sneak, then uses the existing per-observer Stealth and endpoint-protection rules. Invalid paths stop without a roll or movement.
+Choose **Step** or **Sneak** from the token's normal Foundry movement-mode menu. Normal Walk means Stride. The former Stride/Sneak/Step popup is removed. Step validates one 5-foot square, Speed of at least 10 feet, native terrain cost and supported scene terrain; it avoids movement reactions. Sneak divides the measured native path into half-Speed action budgets, or full-Speed budgets with Swift/Legendary Sneak, then makes one secret check and endpoint check for every action used. Combat paths requiring more than three Sneak actions are rejected because extra-action permissions cannot be inferred. Invalid paths stop without a roll or movement.
 
 Selecting Sneak synchronizes the removable Sneak effect with the native menu choice. Starting Sneak from the sheet/stealth controls selects that mode too. Choosing another mode removes the Sneak mode effect without itself revealing the character; Step can preserve Hidden while Stride reveals before movement. Previously armed Sneak remains compatible during migration. Reaction prompts, including Shield Block, still pause movement and AI until resolved.
 
