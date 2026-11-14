@@ -95,7 +95,12 @@ export class RulesRuntime {
     if(this.features.size)installEnvironmentRolls({packageId:CORE_ID,playerStealth:this.has('movement')?this.playerStealth:null,
       conditionsEnabled:()=>this.has('conditions'),environmentEnabled:()=>this.has('environment')});
     for(const feature of ['environment','conditions','movement'])await this.controllers.get(feature)?.start?.(this);
-    this.publish();if(this.features.size)await migrateRegionScripts();await this.refresh();return this.rules;
+    this.publish();if(this.features.size)await migrateRegionScripts();await this.refresh();
+    // SceneControls prepares and caches its tool model once. In worlds with a
+    // large module set that first render can precede the manual-suite entry
+    // modules, so rebuild it after every enabled feature has registered.
+    await globalThis.ui?.controls?.render?.({reset:true});
+    return this.rules;
   }
   installRefreshHooks(){
     this.hooksInstalled=true;

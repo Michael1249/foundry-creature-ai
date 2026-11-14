@@ -1,0 +1,33 @@
+{
+  "version": "0.43.9",
+  "date": "2026-11-14",
+  "finding": "All tactical-suite tools were absent from Foundry 14 Token Controls in a module-heavy adventure world even though the four manual packages were active and the NPC AI package was inactive.",
+  "fix": "After registered manual features finish startup, the shared runtime rebuilds Foundry SceneControls with the supported reset render option so its cached tool model includes the suite controls.",
+  "tests": {
+    "fullPassed": 1214,
+    "failed": 0,
+    "testFiles": 97,
+    "parallelProcesses": 11,
+    "elapsedSeconds": 30.5,
+    "regression": "Manual-suite startup requests exactly one scene-control reset after feature registration."
+  },
+  "artifact": {
+    "archive": "releases/pf2e-tactical-suite-0.43.9.zip",
+    "archiveBytes": 710040,
+    "sha256": "CFECEB22D04809EA0542F3AAEDCBB7D934B9DCACFE02B6322CDC24492E2E9A0A",
+    "packages": 5,
+    "installedVersions": {
+      "pf2e-tactical-core": "0.43.9",
+      "pf2e-tactical-environment": "0.43.9",
+      "pf2e-tactical-conditions": "0.43.9",
+      "pf2e-tactical-movement": "0.43.9",
+      "foundry-creature-ai": "0.43.9"
+    },
+    "installedPath": "C:/Users/Roman/AppData/Local/FoundryVTT/Data/modules"
+  },
+  "native": {
+    "worldDatabaseChanged": false,
+    "browserReloadRequired": true,
+    "liveReplayPending": true
+  }
+}
