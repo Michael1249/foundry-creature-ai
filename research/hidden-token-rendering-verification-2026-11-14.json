@@ -1,0 +1,34 @@
+{
+  "version": "0.43.20",
+  "date": "2026-11-14",
+  "policy": {
+    "hidden": "A known-square Hidden subject remains rendered through fully blocking walls for a non-GM user with an eligible owned observer.",
+    "undetected": "Observer-relative and explicit Undetected or Unnoticed subjects are suppressed for non-owners even if native Foundry visibility is true.",
+    "owners": "A user retains visibility of their own actor token.",
+    "gm": "GM visibility remains governed by Foundry's native token visibility.",
+    "gmHidden": "The GM-hidden token toggle continues to suppress the token for players."
+  },
+  "verification": {
+    "tests": {
+      "command": "npm test",
+      "files": 97,
+      "cases": 1230,
+      "passed": 1230,
+      "failed": 0
+    },
+    "release": {
+      "archive": "releases/pf2e-tactical-suite-0.43.20.zip",
+      "bytes": 718482,
+      "sha256": "43786a6171839ef82b3dec7c4420cae117cea5d376ee92c69412a98665055657"
+    },
+    "installation": {
+      "packages": 5,
+      "installedVersion": "0.43.20",
+      "foundryPid": 25472,
+      "foundryResponding": true,
+      "manifestHttpStatus": 200,
+      "serverRestarted": false,
+      "clientReloadRequired": "Ctrl+F5"
+    }
+  }
+}

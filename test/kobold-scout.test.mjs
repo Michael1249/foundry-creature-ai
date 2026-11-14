@@ -216,6 +216,23 @@ test('relative visibility keeps a token renderable when Foundry sees a footprint
   game.user=gm;
 });
 
+test('Hidden known squares render through walls while Undetected subjects do not render',async()=>{
+  const f=fixture({footprint:1});fog(f);await rollStealth(f.boss,'hide');
+  let wrapper;globalThis.libWrapper={register:(_id,path,fn)=>{assert.equal(path,'CONFIG.Token.objectClass.prototype.isVisible');wrapper=fn;}};
+  installStealthVisibility();f.player.actor.testUserPermission=user=>user.id==='player';
+  canvas.visibility={tokenVision:true,testVisibility:()=>false};canvas.effects={visionSources:[{active:true}]};
+  const gm=game.user;game.user={id:'player',isGM:false};
+  assert.equal(detectionFor(f.player,f.boss).state,'hidden');
+  assert.equal(wrapper.call(f.boss,()=>false),true,'Hidden preserves its known square through a fully blocking wall');
+  const saved=stealthRecord(f.boss);await f.boss.document.setFlag(MODULE_ID,'stealth',{...saved,entries:saved.entries.map(entry=>({...entry,state:'undetected'}))});
+  assert.equal(wrapper.call(f.boss,()=>true),false,'Undetected suppresses even a natively visible token');
+  f.boss.actor.conditionsSet.add('undetected');f.flags.delete(`token-${f.boss.id}:${MODULE_ID}:stealth`);
+  assert.equal(wrapper.call(f.boss,()=>true),false,'an explicit Undetected condition is also suppressed');
+  f.boss.actor.conditionsSet.delete('undetected');f.boss.actor.conditionsSet.add('hidden');
+  assert.equal(wrapper.call(f.boss,()=>false),true,'an explicit Hidden condition keeps its known square rendered');
+  game.user=gm;
+});
+
 test('Alt+W recognizes the scout and consumes shared terrain/detection APIs without installing manual hooks',async()=>{
   const f=fixture(),hooks=new Map(),wrappers=[];
   globalThis.Hooks={once:(id,fn)=>hooks.set(id,fn),on:(id,fn)=>hooks.set(id,fn)};

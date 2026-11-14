@@ -114,20 +114,36 @@ export function refreshStealthVisibility() {
 }
 
 export function visibleToUser(subject, user = game.user) {
+  if (user.isGM || subject.actor?.testUserPermission?.(user, 'OWNER')) return true;
+  if (subject.actor?.hasCondition('undetected','unnoticed')) return false;
   const record = stealthRecord(subject);
-  if (user.isGM || !record?.entries.some(entry => entry.state === 'undetected')) return true;
-  if (subject.actor?.testUserPermission?.(user, 'OWNER')) return true;
+  if (!record?.entries.some(entry => entry.state === 'undetected')) return true;
   const roster = combatRoster(subject), combatants = roster ? new Set(roster.filter(combatant=>!combatant.defeated).map(combatantTokenId)) : null;
   const observers = canvas.tokens.placeables.filter(token => token !== subject && (!combatants || combatants.has(token.id)) && token.actor?.hitPoints?.value>0 &&
     !token.actor.hasCondition('unconscious','dying','dead') && token.actor.testUserPermission?.(user, 'OWNER'));
   return observers.some(observer => detectionFor(observer, subject).state !== 'undetected');
 }
 
+// Hidden means the observer knows the subject's square, so walls must not make
+// that square disappear from the owning player's canvas. Undetected and
+// Unnoticed deliberately never use this render-only bypass.
+export function hiddenToUser(subject, user = game.user) {
+  if (user.isGM || subject.actor?.testUserPermission?.(user, 'OWNER') || subject.document.hidden ||
+    subject.actor?.hasCondition('undetected','unnoticed')) return false;
+  if (subject.actor?.hasCondition('hidden')) return true;
+  const record = stealthRecord(subject);
+  if (!record) return false;
+  const roster = combatRoster(subject), combatants = roster ? new Set(roster.filter(combatant=>!combatant.defeated).map(combatantTokenId)) : null;
+  return canvas.tokens.placeables.some(observer => observer !== subject && (!combatants || combatants.has(observer.id)) &&
+    observer.actor?.hitPoints?.value > 0 && !observer.actor.hasCondition('unconscious','dying','dead') &&
+    observer.actor.testUserPermission?.(user, 'OWNER') && detectionFor(observer, subject).state === 'hidden');
+}
+
 // Foundry's native token test can miss a creature when its center is behind a
 // wall even though one footprint corner is inside a real vision polygon. Test
 // the same footprint intersections used by the cover rules through Foundry's
 // visibility engine, which preserves lighting, vision range and detection
-// modes. This is a render-only correction; observer-relative Undetected and GM
+// modes. This is a render-only correction; observer-relative detection and GM
 // token hiding are still enforced separately.
 export function cornerVisibleToUser(subject, user = game.user) {
   if (!subject || subject.isPreview || subject.isFilteredOut || subject.document.hidden && !user.isGM) return false;
@@ -159,6 +175,6 @@ export function installStealthVisibility({packageId=namespace}={}) {
   // Use the native visibility getter so Foundry also updates the primary-group
   // token mesh, hit testing, auras and other renderers that inspect visibility.
   libWrapper.register(packageId, 'CONFIG.Token.objectClass.prototype.isVisible', function (wrapped) {
-    return (wrapped() || cornerVisibleToUser(this)) && visibleToUser(this);
+    return (wrapped() || cornerVisibleToUser(this) || hiddenToUser(this)) && visibleToUser(this);
   }, 'WRAPPER');
 }
