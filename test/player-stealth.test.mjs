@@ -434,6 +434,24 @@ test('outside combat player Hide/Sneak still use separate scene observer results
   assert.equal(perception(f.boss).combatId,null);
 });
 
+test('an empty active combat cannot suppress scene observers for a native Hide',async()=>{
+  const f=setup();f.combat.combatants=[];f.combat.combatant=null;fog();
+  await f.controller.request('hide');
+  assert.equal(state(f),'hidden');
+  assert.equal(stealthRecord(f.player).combatId,null);
+  assert.deepEqual(stealthRecord(f.player).entries.map(entry=>entry.observerId),[f.boss.id]);
+  assert.equal(perception(f.boss).combatId,null);
+  assert.deepEqual(perception(f.boss).entries.map(entry=>[entry.subjectId,entry.state]),[[f.player.id,'hidden']]);
+});
+
+test('an unrelated active combat cannot scope a scene token out of manual stealth',async()=>{
+  const f=setup();f.combat.combatants=[{tokenId:'unrelated',sceneId:'scene'}];f.combat.combatant=f.combat.combatants[0];fog();
+  await f.controller.request('hide');
+  assert.equal(state(f),'hidden');
+  assert.equal(stealthRecord(f.player).combatId,null);
+  assert.deepEqual(stealthRecord(f.player).entries.map(entry=>entry.observerId),[f.boss.id]);
+});
+
 test('native hazard checkpoints do not replace the original snapped player movement request',async()=>{
   const f=setup({answer:'stride'});fog();
   const initial=[f.point(500),f.point(600)];

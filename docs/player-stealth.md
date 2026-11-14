@@ -13,7 +13,7 @@ NPC manual checks use the same observer records, native Stealth statistic, Speed
 
 ## Detection and rules
 
-One secret check is compared separately against each eligible enemy's prepared Perception DC. In combat, observers are living opposing combatants in the scene; outside combat they are living non-allied scene creatures. This follows the framework's existing neutral-observer policy. There is no global Hidden condition: one ogre may observe you while another treats you as hidden or undetected.
+One secret check is compared separately against each eligible enemy's prepared Perception DC. In combat, observers are living opposing combatants in the scene. Combat filtering applies only when the acting token belongs to that encounter's viewed-scene roster; an empty, stale, or unrelated active encounter falls back to living non-allied scene creatures, as does play outside combat. This follows the framework's existing neutral-observer policy. There is no global Hidden condition: one ogre may observe you while another treats you as hidden or undetected.
 
 **Observed is the default and remains in force until an action changes it.** Cover or concealment permits Hide but does not itself change Observed to Hidden. A successful Hide is the required Observed → Hidden transition. Sneak checks only observers for whom the creature began that action Hidden or Undetected; it cannot turn an Observed creature Undetected.
 

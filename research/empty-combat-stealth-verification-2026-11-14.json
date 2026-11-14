@@ -1,0 +1,54 @@
+{
+  "version": "0.43.15",
+  "date": "2026-11-14",
+  "diagnosis": {
+    "worldInspectedReadOnly": "pathfinder-adventure-prey-for-death",
+    "nativeHideCaptured": true,
+    "failedRecord": {
+      "combatId": "MXlkfQtZWYH4bxSk",
+      "sceneId": "WwAJN3gwgGqr9kCE",
+      "observerEntries": 0
+    },
+    "activeCombat": {
+      "started": true,
+      "scene": null,
+      "combatants": 0
+    },
+    "cause": "A started empty encounter created an empty combat observer filter, so the valid native Hide roll was saved without observer results."
+  },
+  "policy": {
+    "combatScope": "Use combat observers only when the acting token belongs to the viewed scene encounter roster.",
+    "fallback": "Empty, stale, unrelated and absent encounters use eligible opposing creatures in the viewed scene.",
+    "storedContext": "Fallback scene results use a null combatId so a stale encounter cannot invalidate them."
+  },
+  "tests": {
+    "fullPassed": 1224,
+    "failed": 0,
+    "testFiles": 97,
+    "parallelProcesses": 11,
+    "elapsedSeconds": 26.9,
+    "focusedPlayerStealthPassed": 46,
+    "regressions": [
+      "empty active combat preserves scene observers",
+      "unrelated active combat preserves scene observers",
+      "native Hide records observer-relative Hidden and mirrored perception"
+    ]
+  },
+  "artifact": {
+    "archive": "releases/pf2e-tactical-suite-0.43.15.zip",
+    "archiveBytes": 715456,
+    "sha256": "ED64DF8929BC1440BEEC79824C660A7B63049486DB0B89B5F6CE20DDB97E2F24",
+    "packages": 5,
+    "installedPath": "C:/Users/Roman/AppData/Local/FoundryVTT/Data/modules",
+    "installedVersion": "0.43.15"
+  },
+  "runtime": {
+    "worldDatabaseChanged": false,
+    "foundryProcessPreserved": true,
+    "processId": 25472,
+    "httpStatusAfterInstall": 200,
+    "browserReloadRequired": true,
+    "foundryRestartRequired": false,
+    "liveRerollPending": true
+  }
+}

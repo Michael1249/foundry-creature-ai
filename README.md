@@ -1,5 +1,7 @@
 # Foundry creature AI
 
+**Patch 0.43.15:** fixes native Hide while Foundry retains an empty or unrelated active encounter. Combat observer filtering now applies only when the hiding token belongs to that encounter; otherwise every eligible opposing scene creature receives its own result, caption, and local Hidden appearance. [Manual Hide and Sneak](docs/player-stealth.md). Reload clients with **Ctrl+F5**.
+
 **Patch 0.43.14:** lets every positive cover bonus permit Hide, divides long manual Sneak paths into measured action budgets with one secret check per action, keeps one-corner greater-cover targets rendered through Foundry's native vision engine, and shows observer-relative Hidden with a client-local PF2e overlay. [Manual Hide and Sneak](docs/player-stealth.md) and [corner visibility](docs/stealth-corner-visibility-0.43.11.md). Reload clients with **Ctrl+F5**.
 
 **Patch 0.43.13:** makes wall-derived standard cover reachable for Medium tokens: exactly two of four visible corners now grant +2, one grants +4, and three or four grant none. [Stealth and corner visibility](docs/stealth-corner-visibility-0.43.11.md). Reload clients with **Ctrl+F5**.

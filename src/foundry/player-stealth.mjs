@@ -36,15 +36,15 @@ export class PlayerStealth {
   mirror(subject){
     // Two players can Hide at once. Serialize read/modify/write operations on
     // their shared observers so one character's result cannot erase another's.
-    const context=stealthContext();
+    const context=stealthContext(subject);
     const operation=this.mirrorQueue.catch(()=>{}).then(()=>{
-      const current=stealthContext();
+      const current=stealthContext(subject);
       if(current.sceneId===context.sceneId&&current.combatId===context.combatId&&canvas.tokens.get(subject.id)===subject)return this.writeMirror(subject);
     });
     this.mirrorQueue=operation;return operation;
   }
   async writeMirror(subject){
-    const context=stealthContext(),entries=stealthRecord(subject)?.entries??[];
+    const context=stealthContext(subject),entries=stealthRecord(subject)?.entries??[];
     for(const observer of stealthObservers(subject)){
       const saved=observer.document.getFlag(ns,'perception'),same=saved?.sceneId===context.sceneId&&(saved.combatId??null)===context.combatId;
       const others=same?(saved.entries??[]).filter(entry=>entry.subjectId!==subject.id&&canvas.tokens.get(entry.subjectId)):[];
@@ -61,7 +61,7 @@ export class PlayerStealth {
       const state=detectionFor(canvas.tokens.get(entry.observerId),subject).state;
       return {...entry,state,knownPosition:state==='undetected'?entry.knownPosition:position(subject)};
     });
-    const next={...stealthContext(),moving:false,entries,manual:true};
+    const next={...stealthContext(subject),moving:false,entries,manual:true};
     if(JSON.stringify(saved)!==JSON.stringify(next))await subject.document.setFlag(ns,'stealth',next);
     await this.mirror(subject);
   }
@@ -136,13 +136,13 @@ export class PlayerStealth {
     const roll=await token.actor.getStatistic('stealth').check.roll({skipDialog:true,action:'sneak',traits:['secret'],
       extraRollOptions:[managed,'secret','skip-handling-message','action:sneak']});
     if(!roll||!Number.isFinite(roll.total))throw new Error('Sneak roll was cancelled; no movement occurred');
-    const context=stealthContext();
+    const context=stealthContext(token);
     await rollStealth(token,'sneak',{observers,starts,eligible,coverThroughout,destination:center(token,path.at(-1)),moving:true,providedRoll:roll,valid,manual:true});
     await this.mirror(token);
     return {observers,starts,eligible,roll,context};
   }
   async finishSneak(token,plan,traveled){
-    const context=stealthContext();
+    const context=stealthContext(token);
     if(game.users.activeGM?.id!==game.user.id||context.sceneId!==plan.context.sceneId||context.combatId!==plan.context.combatId)return;
     const actual=position(token),path=[...traveled];if(!equal(path.at(-1),actual))path.push(actual);
     const observers=plan.observers.filter(observer=>canvas.tokens.get(observer.id)===observer);

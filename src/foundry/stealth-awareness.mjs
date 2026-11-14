@@ -8,12 +8,24 @@ import { sensoryDetection } from './perception-senses.mjs';
 const namespace = 'foundry-creature-ai';
 export const STEALTH_MOVEMENT = `${namespace}:sneak`;
 const square = token => Object.fromEntries(['x','y','elevation','level','width','height','depth'].map(key => [key, token.document[key] ?? (key === 'depth' ? 1 : null)]));
-export const stealthContext = () => ({ combatId: game.combat?.started ? game.combat.id : null, sceneId: canvas.scene?.id });
+const combatantTokenId = combatant => combatant.tokenId ?? combatant.token?.id;
+const combatantSceneId = (combatant, combat) => combatant.sceneId ?? combatant.token?.parent?.id ?? combat.scene?.id ?? null;
+// Foundry can retain a started encounter with no combatants, or an encounter
+// belonging to another scene. Such an encounter must not suppress ordinary
+// scene observers. Combat scoping applies only when this subject is actually in
+// the viewed scene's encounter roster.
+const combatRoster = subject => {
+  const combat = game.combat, sceneId = canvas.scene?.id;
+  if (!combat?.started || !subject || !sceneId) return null;
+  const roster = Array.from(combat.combatants ?? []).filter(combatant => combatantSceneId(combatant, combat) === sceneId);
+  return roster.some(combatant => combatantTokenId(combatant) === subject.id) ? roster : null;
+};
+export const stealthContext = subject => ({ combatId: combatRoster(subject) ? game.combat.id : null, sceneId: canvas.scene?.id });
 const openStealth = subject => hasStealthConcealment(subject.actor) || subject.actor.hasCondition('invisible') || (subject.actor.itemTypes?.feat ?? []).some(item=>item.slug==='legendary-sneak');
 
 export function stealthRecord(subject) {
   const saved = subject.document.getFlag?.(namespace, 'stealth');
-  return saved && (saved.combatId ?? null) === stealthContext().combatId && saved.sceneId === canvas.scene?.id ? saved : null;
+  return saved && (saved.combatId ?? null) === stealthContext(subject).combatId && saved.sceneId === canvas.scene?.id ? saved : null;
 }
 
 export function stealthConditionStamp(subject) {
@@ -43,8 +55,7 @@ export function detectionFor(observer, subject) {
 }
 
 export function stealthObservers(subject) {
-  const ids = game.combat?.started ? new Set(Array.from(game.combat.combatants).filter(c => !c.defeated &&
-    (c.sceneId ?? c.token?.parent?.id ?? canvas.scene.id) === canvas.scene.id).map(c => c.tokenId)) : null;
+  const roster = combatRoster(subject), ids = roster ? new Set(roster.filter(combatant => !combatant.defeated).map(combatantTokenId)) : null;
   return canvas.tokens.placeables.filter(observer => observer !== subject && (!ids || ids.has(observer.id)) && observer.actor?.isOfType?.('creature') &&
     !observer.actor.isAllyOf(subject.actor) && observer.actor.hitPoints?.value > 0 && !observer.actor.hasCondition('unconscious','dying','dead'));
 }
@@ -59,7 +70,7 @@ export function hidingFrom(observer, subject, destination) {
 export async function reveal(subject) {
   await clearStealthBelief(subject);
   if (!stealthRecord(subject)) return;
-  await subject.document.setFlag(namespace, 'stealth', { ...stealthContext(), moving: false, entries: [] });
+  await subject.document.setFlag(namespace, 'stealth', { ...stealthContext(subject), moving: false, entries: [] });
 }
 
 export async function rollStealth(subject, kind, { observers = stealthObservers(subject), eligible, valid = () => true, coverThroughout, destination, moving = false,
@@ -89,12 +100,12 @@ export async function rollStealth(subject, kind, { observers = stealthObservers(
     return { observerId: observer.id, state, degree, total: roll.total + bonus, dc,
       knownPosition: state === 'undetected' ? starts.get(observer.id)?.knownPosition ?? square(subject) : square(subject) };
   });
-  await subject.document.setFlag(namespace, 'stealth', { ...stealthContext(), moving, entries, ...(manual?{manual:true}:{}) });
+  await subject.document.setFlag(namespace, 'stealth', { ...stealthContext(subject), moving, entries, ...(manual?{manual:true}:{}) });
   return entries;
 }
 
 export async function finishSneak(subject, entries) {
-  await subject.document.setFlag(namespace,'stealth',{...stealthContext(),moving:false,
+  await subject.document.setFlag(namespace,'stealth',{...stealthContext(subject),moving:false,
     entries:entries.map(entry=>({...entry,knownPosition:entry.state==='undetected'?entry.knownPosition:square(subject)}))});
 }
 
@@ -106,7 +117,7 @@ export function visibleToUser(subject, user = game.user) {
   const record = stealthRecord(subject);
   if (user.isGM || !record?.entries.some(entry => entry.state === 'undetected')) return true;
   if (subject.actor?.testUserPermission?.(user, 'OWNER')) return true;
-  const combatants = game.combat?.started ? new Set(Array.from(game.combat.combatants).filter(c=>!c.defeated).map(c=>c.tokenId)) : null;
+  const roster = combatRoster(subject), combatants = roster ? new Set(roster.filter(combatant=>!combatant.defeated).map(combatantTokenId)) : null;
   const observers = canvas.tokens.placeables.filter(token => token !== subject && (!combatants || combatants.has(token.id)) && token.actor?.hitPoints?.value>0 &&
     !token.actor.hasCondition('unconscious','dying','dead') && token.actor.testUserPermission?.(user, 'OWNER'));
   return observers.some(observer => detectionFor(observer, subject).state !== 'undetected');

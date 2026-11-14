@@ -32,7 +32,7 @@ export function inSeekArea(token,area) {
 }
 
 export async function executeSeek(adapter,choice,ledger,{canContinue=()=>true}={}) {
-  const observer=adapter.token,actor=adapter.actor,context=stealthContext();
+  const observer=adapter.token,actor=adapter.actor,context=stealthContext(observer);
   const valid=()=>canContinue()&&adapter.turnKey()===ledger.turn&&!game.paused&&game.users.activeGM?.id===game.user.id&&
     canvas.scene?.id===context.sceneId&&canvas.tokens.get(observer.id)===observer&&!adapter.turnEndReason();
   if(!valid())return {skipped:true,pause:true,skipReason:'Stopped before Seek began'};
