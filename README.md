@@ -1,5 +1,7 @@
 # Foundry creature AI
 
+**Patch 0.43.12:** restores ray-through cover for every existing cover Region, including legacy protected-area configurations. Entering, leaving or crossing the Region grants cover; the directional firing-radius exception still permits shooting out, while two creatures sharing the cover receive its ordinary defense. Wall corner visibility now uses sight collisions. [Cover and concealment Regions](docs/environment-zones.md). Reload clients with **Ctrl+F5**.
+
 **Version 0.43.11:** enforces the Observed → Hide → Hidden → Sneak → Undetected progression and replaces center rays with footprint-corner visibility. One observer intersection must see the target's full footprint for an unobstructed view; partial views apply the table's standard/greater-cover thresholds. [Stealth and corner visibility](docs/stealth-corner-visibility-0.43.11.md). Reload clients with **Ctrl+F5**.
 
 **Version 0.43.10:** places Region editors where they belong: the cover/concealment cloud and ramp/stairs tools now appear under Region Controls. Token and actor actions remain under Token Controls. [Control placement](docs/scene-controls-0.43.10.md). Reload clients with **Ctrl+F5**.

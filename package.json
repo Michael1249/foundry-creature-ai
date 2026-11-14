@@ -1,6 +1,6 @@
 {
   "name": "foundry-creature-ai",
-  "version": "0.43.11",
+  "version": "0.43.12",
   "private": true,
   "type": "module",
   "description": "PF2e creature AI with shared tactical plans, behavior components, native rules and a basic NPC fallback",

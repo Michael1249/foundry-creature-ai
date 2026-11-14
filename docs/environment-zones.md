@@ -16,17 +16,17 @@ The module uses ordinary Foundry **Scene Regions**. Since 0.13.0, the cloud edit
 | --- | --- | --- | --- |
 | Fog or smoke | None | Any | Fog / smoke: sight line enters or crosses region |
 | Bushes giving concealment | None | Any | Foliage: target inside |
-| Space protected by crates | Standard | Protected area: target inside, attacker outside | None |
-| Low barricade footprint | Standard | Obstacle: crosses region, both creatures outside | None |
+| Space protected by crates | Standard | Attack line enters or crosses Region | None |
+| Low barricade footprint | Standard | Attack line enters or crosses Region | None |
 | Especially substantial cover | Greater, if the GM awards it | Appropriate mode | As appropriate |
 
-**Protected areas** are a GM declaration of where cover applies, not automatic directional geometry: a target inside has the selected cover against an attacker outside, from any direction. Creatures sharing the same area have no cover from that area against each other. Draw separate protected areas where direction matters. **Obstacle** mode instead applies when both centers are outside and the native center-to-center sight-height line crosses the region. This describes partial cover, not a solid blocking object. Add/configure walls separately for solid obstacles.
+Cover uses the native sight-height line between the creatures. Entering, leaving or crossing the Region grants its configured defense, including when the target is inside it. Legacy **Protected area** and **Obstacle** values both use this rule, so existing scenes work without rewriting Region documents. The directional firing-radius exception lets a nearby creature shoot outward through its own cover; attacks toward it still receive cover. When both creatures are inside or within the firing radius, ordinary cover applies. This describes partial cover, not a solid blocking object. Add/configure walls separately for solid obstacles and visibility blocking.
 
 **Fog/smoke** concealment applies if either endpoint is inside or the native line crosses the region, including two creatures within the same fog. **Foliage** concealment applies to occupants, regardless of whether the observer is also inside. These are explicit GM choices, not light or distance attenuation simulation.
 
 Overlaps use the highest cover bonus and one concealment flat check. Lesser cover is +1 AC and does not permit Hide; standard/greater cover allow Hide and provide +2/+4 Stealth in the scout handler. Concealment can also permit Hide, but does not grant a Stealth bonus or automatically make someone Hidden.
 
-Native walls and obstacles also use the campaign's [footprint-corner visibility policy](stealth-corner-visibility-0.43.11.md). Medium creatures contribute four corners; larger creatures contribute every grid intersection across their footprint. One observer intersection seeing the whole target footprint is unobstructed, exactly one visible target intersection grants greater cover, and more than one but fewer than half grants standard cover. Zero visible intersections blocks the path. Explicit Region cover combines with this geometry by using the highest applicable bonus.
+Native sight walls use the campaign's [footprint-corner visibility policy](stealth-corner-visibility-0.43.11.md). Medium creatures contribute four corners; larger creatures contribute every grid intersection across their footprint. One observer intersection seeing the whole target footprint is unobstructed, exactly one visible target intersection grants greater cover, and more than one but fewer than half grants standard cover. Zero visible intersections blocks sight. Movement-only barriers do not count as visibility walls. Explicit Region cover remains a separate sight-height line test and combines with wall cover by using the highest applicable bonus.
 
 ## Firing from behind cover
 

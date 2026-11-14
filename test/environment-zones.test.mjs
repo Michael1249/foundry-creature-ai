@@ -29,11 +29,11 @@ function region(f, { x = 450, y = 100, width = 200, height = 400, cover = 'none'
   canvas.scene.regions.contents.push(r);return r;
 }
 
-test('protected cover is directional and lesser cover cannot enable Hide', () => {
+test('cover applies when the ray enters or crosses a legacy occupant Region, while lesser cover cannot enable Hide', () => {
   const f=fixture();const r=region(f,{cover:'standard'});
   let e=environmentBetween(f.boss,f.player);assert.equal(e.coverBonus,2);assert.equal(e.canHide,true);assert.equal(e.stealthBonus,2);
-  assert.equal(environmentBetween(f.player,f.boss).coverBonus,0);
-  f.boss.document.x=450;assert.equal(environmentBetween(f.boss,f.player).coverBonus,0,'sharing cover is not protection against each other');
+  assert.equal(environmentBetween(f.player,f.boss).coverBonus,0,'a nearby shooter can fire out through its own cover');
+  f.boss.document.x=450;assert.equal(environmentBetween(f.boss,f.player).coverBonus,2,'both creatures inside use ordinary cover');
   f.boss.document.x=200;r.flags[MODULE_ID].environment.cover='lesser';e=environmentBetween(f.boss,f.player);
   assert.equal(e.coverBonus,1);assert.equal(e.canHide,false);assert.equal(e.stealthBonus,0);
 });

@@ -51,20 +51,22 @@ function crosses(region, origin, destination) {
 
 export function environmentBetween(observer, target, { origin, destination, scene = observer.document.parent ?? globalThis.canvas?.scene } = {}) {
   const from = tokenRayPoint(observer, 'sight', origin), to = tokenRayPoint(target, 'sight', destination);
-  const footprint=footprintVisibility(observer,target,{type:'move',origin,destination});
+  // Native walls use sight-collision corner rays. Region cover below remains a
+  // separate GM-authored sight-height line test and never blocks visibility.
+  const footprint=footprintVisibility(observer,target,{type:'sight',origin,destination});
   let coverBonus = footprint.coverBonus, concealed = false;
   const sources = coverBonus?[{id:'footprint-obstruction',name:'Walls / obstacles',coverBonus,concealed:false,
     visiblePoints:footprint.visiblePoints,totalPoints:footprint.totalPoints}]:[];
   for (const region of scene?.regions?.contents ?? []) {
     const config = zoneConfig(region);
     if (region.hidden || !config || !relevantLevel(region, observer.document.level) || !relevantLevel(region, target.document.level)) continue;
-    const insideTarget = region.testPoint(to), insideObserver = region.testPoint(from);
-    const crossing = (config.coverMode === 'intervening' || config.concealment === 'through') && crosses(region, from, to);
-    // Occupant cover is a GM-declared defensive area (behind a barricade, among
-    // crates). Sharing that area does not grant cover from one another. An
-    // intervening obstacle protects across its footprint, not against someone
-    // occupying that same obstacle. Walls still decide physical line of effect.
-    const grantsCover = config.coverMode === 'occupants' ? insideTarget && !insideObserver : crossing && !insideObserver && !insideTarget;
+    const insideTarget = region.testPoint(to);
+    const crossing = (COVER_BONUS[config.cover] > 0 || config.concealment === 'through') && crosses(region, from, to);
+    // Cover Regions are line geometry: entering, leaving or crossing the shape
+    // grants their cover. Legacy occupants/intervening flags remain readable so
+    // existing worlds migrate without rewriting Region documents. The firing
+    // radius below is the directional exception for shooting out from cover.
+    const grantsCover = COVER_BONUS[config.cover] > 0 && crossing;
     const firingBypass = grantsCover && COVER_BONUS[config.cover] > 0 &&
       withinFiringRadius(region, from, config.firingRadius, scene) && !withinFiringRadius(region, to, config.firingRadius, scene);
     const bonus = grantsCover && !firingBypass ? COVER_BONUS[config.cover] : 0;
@@ -93,7 +95,7 @@ export function coverAlongPath(observer, subject, centers) {
     if(points.slice(1).some((to,i)=>region.segmentizeMovementPath([points[i],to],[{x:0,y:0}]).some(segment=>segment.type!==0)))continue;
     best=Math.max(best,COVER_BONUS[config.cover]);
   }
-  const footprint=centers.length?Math.min(...centers.map(destination=>footprintVisibility(observer,subject,{type:'move',destination}).coverBonus)):0;
+  const footprint=centers.length?Math.min(...centers.map(destination=>footprintVisibility(observer,subject,{type:'sight',destination}).coverBonus)):0;
   return Math.max(best,footprint);
 }
 
@@ -132,7 +134,8 @@ export async function openZones(regionId) {
       <p>To edit a different region's existing values, select it and click <strong>Load region</strong> first.</p>
       <div class="form-group"><label>Enabled</label><input name="enabled" type="checkbox" ${config.enabled ? 'checked' : ''}></div>
       <div class="form-group"><label>Cover</label><select name="cover">${options({ none: 'None', lesser: 'Lesser (+1 AC; cannot Hide)', standard: 'Standard (+2 AC and Stealth)', greater: 'Greater (+4 AC and Stealth)' }, config.cover)}</select></div>
-      <div class="form-group"><label>Cover geometry</label><select name="coverMode">${options({ occupants: 'Protected area: target inside, attacker outside', intervening: 'Obstacle: crosses region, both creatures outside' }, config.coverMode)}</select></div>
+      <input name="coverMode" type="hidden" value="${escape(config.coverMode)}">
+      <p>Cover applies when the sight-height line enters or crosses this Region, including when the target is inside it. It changes attack defense and Hide eligibility but does not block visibility; use Foundry walls for that.</p>
       <div class="form-group"><label>Firing radius (ft)</label><input name="firingRadius" type="number" min="0" step="any" required value="${config.firingRadius}"></div>
       <p>Within this distance of the cover footprint, a shooter ignores this zone's cover against targets outside the radius. Return attacks still use normal cover. If both creatures are within the radius, normal cover applies. Set 0 to disable. Concealment is unchanged.</p>
       <div class="form-group"><label>Concealment</label><select name="concealment">${options({ none: 'None', occupants: 'Foliage: target inside', through: 'Fog / smoke: sight line enters or crosses region' }, config.concealment)}</select></div>

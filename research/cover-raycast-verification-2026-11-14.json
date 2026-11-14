@@ -1,0 +1,30 @@
+{
+  "version": "0.43.12",
+  "date": "2026-11-14",
+  "behavior": {
+    "walls": "Footprint-corner visibility and partial-cover thresholds use native sight collision.",
+    "coverRegions": "A sight-height line entering, leaving or crossing any enabled cover Region grants its configured cover, including legacy occupants configurations.",
+    "firingRadius": "A source within the configured radius ignores that Region against a target outside the radius; incoming attacks and two creatures sharing the cover use ordinary cover.",
+    "visibility": "Cover Regions change defense and Hide eligibility but do not block sight; Foundry walls own visibility blocking."
+  },
+  "tests": {
+    "fullPassed": 1218,
+    "failed": 0,
+    "testFiles": 97,
+    "parallelProcesses": 11,
+    "elapsedSeconds": 28.7,
+    "regression": "Legacy occupant Region ray crossing, outgoing firing bypass, shared-cover defense, sight-wall corner cover, manual roll defense and AI environment scoring."
+  },
+  "artifact": {
+    "archive": "releases/pf2e-tactical-suite-0.43.12.zip",
+    "archiveBytes": 711982,
+    "sha256": "0B0CC98AD36193BA9F8F3F2F69466B7E946AD085692904B796EA8749DCD37237",
+    "packages": 5,
+    "installedPath": "C:/Users/Roman/AppData/Local/FoundryVTT/Data/modules"
+  },
+  "native": {
+    "worldDatabaseChanged": false,
+    "browserReloadRequired": true,
+    "liveReplayPending": true
+  }
+}
