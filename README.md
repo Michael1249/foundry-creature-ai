@@ -1,6 +1,8 @@
 # Foundry creature AI
 
-**Patch 0.43.18:** keeps one secret Sneak roll across separate manual drags until cumulative movement enters the next Sneak action, then rolls exactly once for that action. Token captions now include Observed, and a client setting can show status hints always or only while holding the configurable **Show token stealth status hints** key (default **Alt+V**). [Manual Hide and Sneak](docs/player-stealth.md). Reload clients with **Ctrl+F5**.
+**Patch 0.43.19:** revises native-wall footprint cover: zero visible target corners blocks line of sight, one visible corner grants standard cover (+2), every other partial view grants lesser cover (+1), and only all visible corners remove cover. Explicit cover Regions keep their configured lesser, standard, or greater value. [Stealth and corner visibility](docs/stealth-corner-visibility-0.43.11.md). Reload clients with **Ctrl+F5**.
+
+**Patch 0.43.18:** keeps one secret Sneak roll across separate manual drags until cumulative movement enters the next Sneak action, then rolls exactly once for that action. Token captions now include Observed, and a client setting can show status hints always or only while holding the configurable **Show token stealth status hints** key (default **Alt+V**). [Manual Hide and Sneak](docs/player-stealth.md).
 
 **Patch 0.43.17:** moves wall-visibility ray samples 0.05 grid units inward from token edges. A grid-snapped wall touching a creature no longer falsely covers its adjacent corners, while walls between creatures still block sight and attacks. [Footprint-corner visibility](docs/stealth-corner-visibility-0.43.11.md). Reload clients with **Ctrl+F5**.
 

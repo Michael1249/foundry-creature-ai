@@ -225,7 +225,7 @@ test('corner cover keeps an unhidden creature Observed, then supports Hide follo
   const f=setup(),visible=new Set(['500,200','600,200']);
   f.boss.checkCollision=destination=>!visible.has(`${destination.x},${destination.y}`);
   assert.equal(state(f),'observed');
-  // One visible corner is greater cover. Hide is the required transition from
+  // One visible corner is standard cover. Hide is the required transition from
   // Observed to Hidden; Sneak may then attempt Hidden to Undetected.
   visible.delete('600,200');await f.controller.request('hide');assert.equal(state(f),'hidden');
   visible.add('700,200');

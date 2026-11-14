@@ -1,0 +1,35 @@
+{
+  "version": "0.43.19",
+  "date": "2026-11-14",
+  "policy": {
+    "scope": "Native wall and collision geometry evaluated from footprint sample points",
+    "zeroVisibleTargetPoints": "Line of sight or physical line of effect is blocked",
+    "oneVisibleTargetPoint": "Standard cover (+2)",
+    "partialViewAboveOnePoint": "Lesser cover (+1)",
+    "allVisibleTargetPoints": "No wall-derived cover",
+    "explicitRegions": "Keep their configured lesser, standard, or greater cover value"
+  },
+  "verification": {
+    "tests": {
+      "command": "npm test",
+      "files": 97,
+      "cases": 1229,
+      "passed": 1229,
+      "failed": 0
+    },
+    "release": {
+      "archive": "releases/pf2e-tactical-suite-0.43.19.zip",
+      "bytes": 718158,
+      "sha256": "54382a3b7a73ea35c2592fca0305fbdc4fde315747e20373ed0f6252e9dc521f"
+    },
+    "installation": {
+      "packages": 5,
+      "installedVersion": "0.43.19",
+      "foundryPid": 25472,
+      "foundryResponding": true,
+      "manifestHttpStatus": 200,
+      "serverRestarted": false,
+      "clientReloadRequired": "Ctrl+F5"
+    }
+  }
+}

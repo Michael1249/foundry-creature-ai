@@ -1,4 +1,4 @@
-# Stealth and footprint-corner visibility — 0.43.11
+# Stealth and footprint-corner visibility — 0.43.19
 
 ## Detection progression
 
@@ -17,9 +17,9 @@ PF2e's published default cover procedure draws a line between creature centers. 
 3. Each observer intersection is tested against every target intersection. Results from separate observer intersections are not combined.
 4. If one observer intersection can see every target intersection, the view is unobstructed.
 5. If no target intersection is visible, line of sight or physical line of effect is blocked.
-6. If the best observer intersection sees exactly one target intersection, the target has greater cover (+4 AC and +4 Stealth where applicable).
-7. If it sees more than one but no more than half of the target intersections, the target has standard cover (+2).
-8. If it sees more than half, the partial obstruction grants no cover under this table policy.
+6. If the best observer intersection sees exactly one target intersection, the target has standard cover (+2 AC and +2 Stealth where applicable).
+7. If it sees more than one but fewer than all target intersections, the target has lesser cover (+1 AC). Lesser cover permits Hide but grants no Stealth circumstance bonus.
+8. Only a view of every target intersection removes wall-derived cover.
 
 Each sampled intersection is moved **0.05 grid units inward toward its token center** before collision testing. This avoids treating a grid-snapped wall that merely touches a creature's footprint as covering that creature's adjacent corners. Internal samples remain internal, and a wall between two creatures still blocks the inset rays normally.
 

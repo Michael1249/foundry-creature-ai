@@ -69,25 +69,27 @@ test('one observer intersection must see the whole target to remove corner obstr
   f.attacker.checkCollision=destination=>!visible.has(`${destination.x},${destination.y}`);
   let result=footprintVisibility(f.attacker,f.target);
   assert.deepEqual({visible:result.visible,points:result.visiblePoints,total:result.totalPoints,cover:result.coverBonus},
-    {visible:true,points:3,total:9,cover:2});
+    {visible:true,points:3,total:9,cover:1});
   visible.clear();visible.add('205,5');result=footprintVisibility(f.attacker,f.target);
-  assert.equal(result.coverBonus,4,'one visible target intersection grants greater cover');
+  assert.equal(result.coverBonus,2,'one visible target intersection grants standard cover');
   visible.add('300,5');visible.add('395,5');visible.add('205,100');visible.add('300,100');
-  result=footprintVisibility(f.attacker,f.target);assert.equal(result.coverBonus,0,'more than half visible is not cover under the table policy');
+  result=footprintVisibility(f.attacker,f.target);assert.equal(result.coverBonus,1,'every partial view beyond one point grants lesser cover');
 });
 
-test('a Medium target receives standard cover when exactly half of its corners are visible',()=>{
+test('a Medium target receives lesser cover whenever more than one but fewer than all corners are visible',()=>{
   const f=fixture(),visible=new Set(['205,5','295,5']);
   f.attacker.checkCollision=destination=>!visible.has(`${destination.x},${destination.y}`);
   let result=footprintVisibility(f.attacker,f.target);
-  assert.equal(result.totalPoints,4);assert.equal(result.visiblePoints,2);assert.equal(result.coverBonus,2);
+  assert.equal(result.totalPoints,4);assert.equal(result.visiblePoints,2);assert.equal(result.coverBonus,1);
   visible.add('205,95');result=footprintVisibility(f.attacker,f.target);
-  assert.equal(result.visiblePoints,3);assert.equal(result.coverBonus,0,'more than half visible grants no wall cover');
+  assert.equal(result.visiblePoints,3);assert.equal(result.coverBonus,1,'three of four visible corners still grant lesser cover');
+  visible.add('295,95');result=footprintVisibility(f.attacker,f.target);
+  assert.equal(result.visiblePoints,4);assert.equal(result.coverBonus,0,'all visible corners remove wall cover');
 });
 
 test('rays visible from different observer corners do not combine into an unobstructed view',()=>{
   const f=fixture(),origins=new Map([['5,5','205,5'],['5,95','295,5'],['95,5','205,95'],['95,95','295,95']]);
   f.attacker.checkCollision=(destination,{origin})=>origins.get(`${origin.x},${origin.y}`)!==`${destination.x},${destination.y}`;
   const result=footprintVisibility(f.attacker,f.target);
-  assert.equal(result.visible,true);assert.equal(result.unobstructed,false);assert.equal(result.visiblePoints,1);assert.equal(result.coverBonus,4);
+  assert.equal(result.visible,true);assert.equal(result.unobstructed,false);assert.equal(result.visiblePoints,1);assert.equal(result.coverBonus,2);
 });
