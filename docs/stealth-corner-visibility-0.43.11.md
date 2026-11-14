@@ -1,0 +1,28 @@
+# Stealth and footprint-corner visibility — 0.43.11
+
+## Detection progression
+
+Detection is relative to each observer and defaults to **Observed**. Cover, greater cover, concealment, or another valid visual protection permits a creature to **Hide**; the protection alone does not make it Hidden. A successful Hide changes Observed to **Hidden** for that observer.
+
+**Sneak cannot improve an Observed state.** It checks only observers for whom the creature was Hidden or Undetected when that Sneak began. Against an eligible observer, a successful Sneak makes the creature Undetected, a failure leaves it Hidden, and a critical failure makes it Observed. The endpoint must still provide valid protection unless a rule such as Legendary Sneak removes that requirement.
+
+This progression is shared by manual player/NPC Hide and Sneak, AI stealth, captions, targeting checks, and observer memory. No global Hidden condition is required because different observers can have different states.
+
+## Footprint-corner table policy
+
+PF2e's published default cover procedure draws a line between creature centers. This campaign instead uses the following scriptable table policy for walls and other native collision geometry:
+
+1. Medium and smaller tokens contribute their four footprint corners.
+2. Larger tokens contribute every grid intersection across their footprint, including internal intersections.
+3. Each observer intersection is tested against every target intersection. Results from separate observer intersections are not combined.
+4. If one observer intersection can see every target intersection, the view is unobstructed.
+5. If no target intersection is visible, line of sight or physical line of effect is blocked.
+6. If the best observer intersection sees exactly one target intersection, the target has greater cover (+4 AC and +4 Stealth where applicable).
+7. If it sees more than one but fewer than half of the target intersections, the target has standard cover (+2).
+8. If it sees at least half, the partial obstruction grants no cover under this table policy.
+
+The same calculation is used for sight, physical attack paths, wall/obstacle cover, Hide eligibility, continuous cover during Sneak, manual attacks, reactions, and AI decisions. Explicit cover/concealment Regions remain active and combine by using the highest applicable cover bonus.
+
+Complete obstruction can prevent precise sight, but partial cover never changes Observed to Hidden automatically. The creature must successfully Hide before it can Sneak to Undetected.
+
+Rules references: [Detecting Creatures](https://2e.aonprd.com/Rules.aspx?ID=2414), [Hide](https://2e.aonprd.com/Actions.aspx?ID=2404), [Sneak](https://2e.aonprd.com/Actions.aspx?ID=2405), [Cover](https://2e.aonprd.com/Rules.aspx?ID=2372).

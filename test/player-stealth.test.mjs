@@ -217,6 +217,17 @@ test('Sneak cannot grant detection protection against an enemy who observed the 
   const f=setup();fog();await f.movement.receive(f.data(f.point(600)),game.user);assert.equal(state(f),'observed');
 });
 
+test('corner cover keeps an unhidden creature Observed, then supports Hide followed by Sneak',async()=>{
+  const f=setup(),visible=new Set(['500,200','600,200']);
+  f.boss.checkCollision=destination=>!visible.has(`${destination.x},${destination.y}`);
+  assert.equal(state(f),'observed');
+  // One visible corner is greater cover. Hide is the required transition from
+  // Observed to Hidden; Sneak may then attempt Hidden to Undetected.
+  visible.delete('600,200');await f.controller.request('hide');assert.equal(state(f),'hidden');
+  visible.add('700,200');
+  await f.movement.receive(f.data(f.point(600)),game.user);assert.equal(state(f),'undetected');
+});
+
 test('Sneak ends Observed without endpoint protection, except for Legendary Sneak',async()=>{
   for(const legendary of [false,true]){
     const f=setup();fog({right:580});await hidden(f);

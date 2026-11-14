@@ -1,4 +1,4 @@
-import { clearSightPath, tokenRayPoint } from './attack-path.mjs';
+import { clearSightPath, footprintVisibility } from './attack-path.mjs';
 import { environmentBetween } from './environment-zones.mjs';
 import { checkDegree } from '../framework/math.mjs';
 import { hasStealthConcealment } from './zone-concealment.mjs';
@@ -51,9 +51,7 @@ export function stealthObservers(subject) {
 
 export function hidingFrom(observer, subject, destination) {
   const environment = environmentBetween(observer, subject, { destination });
-  const target = destination ? { center:destination, document:{ parent:subject.document.parent,
-    getVisionOrigin:()=>tokenRayPoint(subject,'sight',destination) } } : subject;
-  const blocked = !clearSightPath(observer, target);
+  const blocked = !footprintVisibility(observer,subject,{type:'sight',destination}).visible;
   const inherent = openStealth(subject) || observer.actor.hasCondition('blinded');
   return { ...environment, canHide: environment.canHide || blocked || inherent, blocked };
 }
@@ -119,7 +117,8 @@ export async function openStealthControls(subject = canvas.tokens.controlled[0])
   if (!game.user.isGM || !subject || !game.combat?.started) throw new Error('Select one creature in an active combat as GM');
   const observers = stealthObservers(subject),combatId=game.combat.id,sceneId=canvas.scene.id;
   const answer = await foundry.applications.api.DialogV2.wait({ window: { title: `Creature AI — Detection: ${subject.name}` },
-    content: `<p>Detection is relative to each observer. Correct these states after manual Seek, Point Out, Sneak or other adjudication. This panel does not spend or refund actions.</p>
+    content: `<p>Detection is relative to each observer. <strong>Observed is the normal state.</strong> Cover or concealment permits Hide to make the creature Hidden; it does not change detection by itself. Sneak can make the creature Undetected only for observers that treated it as Hidden or Undetected when the Sneak began.</p>
+      <p>Correct these states after manual Seek, Point Out, Sneak or other adjudication. This panel does not spend or refund actions.</p>
       <p>Hidden retains a known square. Undetected hides this creature from players who have no observing character able to locate it. GM visibility stays available. Global actor conditions remain separate.</p>
       ${observers.map(observer => `<div class="form-group"><label>${escape(observer.name)}</label><select name="${escape(observer.id)}">${['observed','hidden','undetected'].map(state=>`<option value="${state}" ${detectionFor(observer,subject).state===state?'selected':''}>${state}</option>`).join('')}</select></div>`).join('')}`,
     buttons: [{ action: 'save', label: 'Save detection', callback: (event,button) => observers.map(observer=>({observerId:observer.id,state:button.form.elements[observer.id].value})) }], rejectClose:false });

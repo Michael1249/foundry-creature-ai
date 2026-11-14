@@ -1,4 +1,4 @@
-import { tokenRayPoint } from './attack-path.mjs';
+import { tokenRayPoint, footprintVisibility } from './attack-path.mjs';
 import {pointInVolume} from '../shared/area-volume.mjs';
 import { terrainBehavior, environmentBehavior } from './terrain-contract.mjs';
 
@@ -51,8 +51,10 @@ function crosses(region, origin, destination) {
 
 export function environmentBetween(observer, target, { origin, destination, scene = observer.document.parent ?? globalThis.canvas?.scene } = {}) {
   const from = tokenRayPoint(observer, 'sight', origin), to = tokenRayPoint(target, 'sight', destination);
-  let coverBonus = 0, concealed = false;
-  const sources = [];
+  const footprint=footprintVisibility(observer,target,{type:'move',origin,destination});
+  let coverBonus = footprint.coverBonus, concealed = false;
+  const sources = coverBonus?[{id:'footprint-obstruction',name:'Walls / obstacles',coverBonus,concealed:false,
+    visiblePoints:footprint.visiblePoints,totalPoints:footprint.totalPoints}]:[];
   for (const region of scene?.regions?.contents ?? []) {
     const config = zoneConfig(region);
     if (region.hidden || !config || !relevantLevel(region, observer.document.level) || !relevantLevel(region, target.document.level)) continue;
@@ -91,7 +93,8 @@ export function coverAlongPath(observer, subject, centers) {
     if(points.slice(1).some((to,i)=>region.segmentizeMovementPath([points[i],to],[{x:0,y:0}]).some(segment=>segment.type!==0)))continue;
     best=Math.max(best,COVER_BONUS[config.cover]);
   }
-  return best;
+  const footprint=centers.length?Math.min(...centers.map(destination=>footprintVisibility(observer,subject,{type:'move',destination}).coverBonus)):0;
+  return Math.max(best,footprint);
 }
 
 export async function configureZone(region, config) {

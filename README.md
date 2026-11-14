@@ -1,5 +1,7 @@
 # Foundry creature AI
 
+**Version 0.43.11:** enforces the Observed → Hide → Hidden → Sneak → Undetected progression and replaces center rays with footprint-corner visibility. One observer intersection must see the target's full footprint for an unobstructed view; partial views apply the table's standard/greater-cover thresholds. [Stealth and corner visibility](docs/stealth-corner-visibility-0.43.11.md). Reload clients with **Ctrl+F5**.
+
 **Version 0.43.10:** places Region editors where they belong: the cover/concealment cloud and ramp/stairs tools now appear under Region Controls. Token and actor actions remain under Token Controls. [Control placement](docs/scene-controls-0.43.10.md). Reload clients with **Ctrl+F5**.
 
 **Version 0.43.7:** completes the next Lich-versus-vampire tactics pass. A true vampire at critical HP can use Turn to Mist once per encounter, choose a reachable scene edge away from its known opponents, spend the rest of the turn withdrawing, and reform next turn without triggering 0-HP Mist Escape. [Analysis and policy](docs/vampire-mist-retreat-0.43.7.md). Reload clients with **Ctrl+F5**.

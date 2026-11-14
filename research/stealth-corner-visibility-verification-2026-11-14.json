@@ -1,0 +1,36 @@
+{
+  "version": "0.43.11",
+  "date": "2026-11-14",
+  "rules": {
+    "published": [
+      "Detection is relative to each observer and defaults to Observed.",
+      "Cover or concealment permits Hide but does not itself make a creature Hidden.",
+      "Sneak can improve detection only against observers for whom the creature started Hidden or Undetected."
+    ],
+    "tablePolicy": [
+      "Visibility and physical attack paths sample footprint grid intersections.",
+      "One observer intersection seeing all target intersections is unobstructed.",
+      "Exactly one visible target intersection grants greater cover; more than one but fewer than half grants standard cover; zero blocks the path."
+    ]
+  },
+  "tests": {
+    "fullPassed": 1218,
+    "failed": 0,
+    "testFiles": 97,
+    "parallelProcesses": 11,
+    "elapsedSeconds": 30.0,
+    "regression": "Observed remains unchanged by cover alone; Hide can produce Hidden; only a subsequent eligible Sneak can produce Undetected. Separate observer intersections never pool visibility."
+  },
+  "artifact": {
+    "archive": "releases/pf2e-tactical-suite-0.43.11.zip",
+    "archiveBytes": 711817,
+    "sha256": "55FD75FF0AA5BD5C81E36773CA4D5BC75CA01CFD4E03D23E6CFBDB004EE8AD13",
+    "packages": 5,
+    "installedPath": "C:/Users/Roman/AppData/Local/FoundryVTT/Data/modules"
+  },
+  "native": {
+    "worldDatabaseChanged": false,
+    "browserReloadRequired": true,
+    "liveReplayPending": true
+  }
+}

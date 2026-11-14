@@ -7,6 +7,7 @@ import { createCreatureAdapter } from '../src/foundry/creature-profiles.mjs';
 import { rememberTargets, targetKnowledge, movementKnowledge } from '../src/foundry/target-memory.mjs';
 import { MODULE_ID } from '../src/foundry/pf2e-adapter.mjs';
 import { TurnRunner } from '../src/framework/turn-runner.mjs';
+import { clearSightPath } from '../src/foundry/attack-path.mjs';
 
 const data=JSON.parse(await readFile(new URL('./fixtures/ogre-mechanics.json',import.meta.url)));
 const fixture=()=>{
@@ -170,7 +171,7 @@ test('a commanded Ogre spends its restricted movement action to gain sight even 
   assert.match(decision.chosen.intent,/regain sight/);
   const ledger=await new TurnRunner(adapter).run({oneAction:true});
   assert.equal(ledger.actionsRemaining,3);assert.equal(ledger.bonusMovementActions,0);
-  assert.ok(ally.document.y>=800,'moves to a clear view rather than closer to the enemy');
+  assert.ok(clearSightPath(ally,f.player),'moves to a clear view rather than merely closer to the enemy');
   const held=await new TurnRunner(adapter).run();
   assert.equal(held.actionsRemaining,0);assert.equal(held.done,true);
   assert.equal(f.player.actor.hasCondition('hidden'),true);
