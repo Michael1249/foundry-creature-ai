@@ -2,6 +2,7 @@ import {clearLevelWalls} from './vertical-space.mjs';
 import {flySpeed} from './flight-costs.mjs';
 import {pitBlocksRay} from './pit-geometry.mjs';
 import {iceBlocksRay} from './ice-wall-geometry.mjs';
+export const FOOTPRINT_RAY_INSET = 0.05;
 // Token.center is only 2D in Foundry 14. Use each token's own native ray height,
 // including for a target of a different depth and hypothetical movement origins.
 export function tokenRayPoint(token, type = 'move', center) {
@@ -32,6 +33,12 @@ function footprintAxis(start,length,step){
   if(end!==start)points.push(end);return points;
 }
 
+function insetFootprintPoint(value,center,inset){
+  if(value<center)return Math.min(center,value+inset);
+  if(value>center)return Math.max(center,value-inset);
+  return value;
+}
+
 // Sample every occupied-grid intersection. Medium and smaller creatures have
 // four footprint corners; larger creatures also contribute their internal grid
 // intersections, as required by the table's corner-visibility policy.
@@ -43,7 +50,9 @@ export function footprintRayPoints(token,type='sight',center){
   const width=widthUnits*size,height=heightUnits*size;
   const native=tokenRayPoint(token,type,center),left=center?center.x-width/2:source.x??token.center.x-width/2,
     top=center?center.y-height/2:source.y??token.center.y-height/2;
-  return footprintAxis(left,width,size).flatMap(x=>footprintAxis(top,height,size).map(y=>({x,y,elevation:native.elevation})));
+  const middleX=left+width/2,middleY=top+height/2,inset=size*FOOTPRINT_RAY_INSET;
+  return footprintAxis(left,width,size).flatMap(x=>footprintAxis(top,height,size).map(y=>({
+    x:insetFootprintPoint(x,middleX,inset),y:insetFootprintPoint(y,middleY,inset),elevation:native.elevation})));
 }
 
 export function footprintVisibility(observer,target,{type='sight',origin,destination}={}){

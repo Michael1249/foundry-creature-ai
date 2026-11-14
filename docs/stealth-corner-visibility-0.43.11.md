@@ -21,6 +21,8 @@ PF2e's published default cover procedure draws a line between creature centers. 
 7. If it sees more than one but no more than half of the target intersections, the target has standard cover (+2).
 8. If it sees more than half, the partial obstruction grants no cover under this table policy.
 
+Each sampled intersection is moved **0.05 grid units inward toward its token center** before collision testing. This avoids treating a grid-snapped wall that merely touches a creature's footprint as covering that creature's adjacent corners. Internal samples remain internal, and a wall between two creatures still blocks the inset rays normally.
+
 The sight calculation is used for wall visibility, wall-derived cover, Hide eligibility, continuous cover during Sneak, captions, reactions, and AI decisions. Physical attack paths use the same footprint sampling with movement collision so a transparent solid barrier can still stop an attack. Explicit cover/concealment Regions remain a separate sight-height line test and combine by using the highest applicable cover bonus.
 
 Complete obstruction can prevent precise sight, but partial cover never changes Observed to Hidden automatically. The creature must successfully Hide before it can Sneak to Undetected.

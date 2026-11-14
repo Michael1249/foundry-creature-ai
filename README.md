@@ -1,5 +1,7 @@
 # Foundry creature AI
 
+**Patch 0.43.17:** moves wall-visibility ray samples 0.05 grid units inward from token edges. A grid-snapped wall touching a creature no longer falsely covers its adjacent corners, while walls between creatures still block sight and attacks. [Footprint-corner visibility](docs/stealth-corner-visibility-0.43.11.md). Reload clients with **Ctrl+F5**.
+
 **Patch 0.43.16:** restores native Sneak checks when Foundry retains an empty or unrelated active encounter, and adds the PF2e action glyph to Sneak ruler distances. The displayed action count uses half prepared Speed, or full Speed with Swift Sneak, and marks paths beyond three actions. [Manual Hide and Sneak](docs/player-stealth.md). Reload clients with **Ctrl+F5**.
 
 **Patch 0.43.15:** fixes native Hide while Foundry retains an empty or unrelated active encounter. Combat observer filtering now applies only when the hiding token belongs to that encounter; otherwise every eligible opposing scene creature receives its own result, caption, and local Hidden appearance. [Manual Hide and Sneak](docs/player-stealth.md). Reload clients with **Ctrl+F5**.

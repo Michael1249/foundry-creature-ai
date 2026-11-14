@@ -40,11 +40,11 @@ test('cover applies when the ray enters or crosses a legacy occupant Region, and
 
 test('wall corner visibility contributes standard and greater cover without changing Observed by itself',async()=>{
   const f=fixture();f.player.document.width=2;f.player.document.height=2;
-  const visible=new Set(['500,200','600,200','700,200']);
+  const visible=new Set(['505,205','600,205','695,205']);
   f.boss.checkCollision=destination=>!visible.has(`${destination.x},${destination.y}`);
   let environment=environmentBetween(f.boss,f.player);
   assert.equal(environment.coverBonus,2);assert.equal(environment.canHide,true);assert.equal(environment.sources[0].id,'footprint-obstruction');
-  visible.clear();visible.add('500,200');environment=environmentBetween(f.boss,f.player);
+  visible.clear();visible.add('505,205');environment=environmentBetween(f.boss,f.player);
   assert.equal(environment.coverBonus,4);assert.equal(environment.canHide,true);
   const state=await f.adapter.snapshot(await f.adapter.readLedger(f.adapter.turnKey()));
   assert.equal(state.enemies[0].awareness.state,'observed','cover permits Hide but does not itself make the target Hidden');

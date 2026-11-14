@@ -1,0 +1,44 @@
+{
+  "version": "0.43.17",
+  "date": "2026-11-14",
+  "policy": {
+    "insetGridUnits": 0.05,
+    "direction": "from each footprint sample toward the token center",
+    "scope": [
+      "wall visibility",
+      "wall-derived cover",
+      "physical attack paths",
+      "Hide and Sneak protection",
+      "relative token visibility",
+      "NPC perception"
+    ]
+  },
+  "regressions": [
+    "A grid-snapped wall touching an observer edge does not obstruct rays to a creature on the same side.",
+    "A wall between observer and target still blocks every ray.",
+    "Large tokens retain internal footprint samples while only boundary samples move inward.",
+    "Standard and greater cover thresholds retain their existing visible-point behavior."
+  ],
+  "verification": {
+    "tests": {
+      "command": "npm test",
+      "files": 97,
+      "cases": 1228,
+      "passed": 1228,
+      "failed": 0
+    },
+    "release": {
+      "archive": "releases/pf2e-tactical-suite-0.43.17.zip",
+      "bytes": 716236,
+      "sha256": "875a637e645056f1dee48fc3d22721e9ff5123c2a07898d158ac6df3cc6782a5"
+    },
+    "installation": {
+      "packages": 5,
+      "installedVersion": "0.43.17",
+      "foundryPid": 25472,
+      "manifestHttpStatus": 200,
+      "serverRestarted": false,
+      "clientReloadRequired": "Ctrl+F5"
+    }
+  }
+}

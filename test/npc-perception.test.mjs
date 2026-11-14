@@ -279,9 +279,9 @@ test('whole-field Seek can find multiple far-away stealth users with one secret 
   second.actor.conditionsSet.add('hidden');dc(second,16);f.combat.combatants.push({id:'c-second',tokenId:second.id,sceneId:'scene',actor:second.actor});
   const blocked=f.token('blocked',f.makeActor('blocked',{...data,type:'character'}),2200,1500,1);
   blocked.actor.conditionsSet.add('hidden');dc(blocked,16);f.combat.combatants.push({id:'c-blocked',tokenId:blocked.id,sceneId:'scene',actor:blocked.actor});
-  // Corner sampling never aims at the old center point (2250). Block every
-  // target-side footprint intersection to retain a fully occluded subject.
-  f.boss.checkCollision=(destination,{type}={})=>type==='sight'&&[2200,2300].includes(destination.x);
+  // Inset corner sampling never aims at the old center point (2250). Block
+  // every target-side footprint sample to retain a fully occluded subject.
+  f.boss.checkCollision=(destination,{type}={})=>type==='sight'&&[2205,2295].includes(destination.x);
   const state=await f.adapter.snapshot(await ledger(f)),search=f.adapter.candidates(state).find(c=>c.kind==='seek');
   assert.equal(search.searchScope,'field');assert.equal(search.searchPosition,undefined,'the search does not aim at live hidden coordinates');
   await f.adapter.revalidate(search,await ledger(f));await f.adapter.execute(search,await ledger(f));

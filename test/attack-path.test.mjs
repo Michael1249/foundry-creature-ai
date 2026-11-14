@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { clearAttackPath, clearSightPath, footprintVisibility } from '../src/foundry/attack-path.mjs';
+import { clearAttackPath, clearSightPath, footprintRayPoints, footprintVisibility } from '../src/foundry/attack-path.mjs';
 
 function fixture() {
   const rays=[],surfaces=[];
@@ -26,8 +26,8 @@ test('attack and sight rays use each token’s native height instead of a two-di
 test('lookahead changes the ray’s horizontal origin while retaining native height',()=>{
   const f=fixture();
   clearSightPath(f.attacker,f.target,{x:450,y:350});
-  assert.deepEqual([...new Set(f.rays.map(ray=>ray.origin.x))],[400]);
-  assert.deepEqual([...new Set(f.rays.map(ray=>ray.origin.y))],[300]);
+  assert.deepEqual([...new Set(f.rays.map(ray=>ray.origin.x))],[405]);
+  assert.deepEqual([...new Set(f.rays.map(ray=>ray.origin.y))],[305]);
   assert.ok(f.rays.every(ray=>ray.origin.elevation===16));
 });
 
@@ -47,30 +47,46 @@ test('transparent walls can still block an attack independently of sight',()=>{
   assert.equal(clearAttackPath(f.attacker,f.target),false);
 });
 
+test('footprint rays start inside token edges so an adjacent grid wall does not cover its own corners',()=>{
+  const f=fixture();f.scene.grid.size=100;
+  assert.deepEqual(footprintRayPoints(f.attacker).map(({x,y})=>[x,y]),[[5,5],[5,95],[95,5],[95,95]]);
+  const crosses=wall=>(destination,{origin})=>(origin.x-wall)*(destination.x-wall)<=0;
+  f.attacker.checkCollision=crosses(0);
+  assert.equal(footprintVisibility(f.attacker,f.target).unobstructed,true,'a wall touching the observer edge is outside every inset ray');
+  f.attacker.checkCollision=crosses(150);
+  assert.equal(footprintVisibility(f.attacker,f.target).visible,false,'an intervening wall still blocks every inset ray');
+});
+
+test('Large footprints preserve internal samples while moving boundary samples inward by 0.05 grid units',()=>{
+  const f=fixture();f.scene.grid.size=100;f.attacker.document.width=2;f.attacker.document.height=2;
+  assert.deepEqual([...new Set(footprintRayPoints(f.attacker).map(point=>point.x))],[5,100,195]);
+  assert.deepEqual([...new Set(footprintRayPoints(f.attacker).map(point=>point.y))],[5,100,195]);
+});
+
 test('one observer intersection must see the whole target to remove corner obstruction',()=>{
   const f=fixture();f.target.document.width=2;f.target.document.height=2;
-  const visible=new Set(['200,0','300,0','400,0']);
+  const visible=new Set(['205,5','300,5','395,5']);
   f.attacker.checkCollision=destination=>!visible.has(`${destination.x},${destination.y}`);
   let result=footprintVisibility(f.attacker,f.target);
   assert.deepEqual({visible:result.visible,points:result.visiblePoints,total:result.totalPoints,cover:result.coverBonus},
     {visible:true,points:3,total:9,cover:2});
-  visible.clear();visible.add('200,0');result=footprintVisibility(f.attacker,f.target);
+  visible.clear();visible.add('205,5');result=footprintVisibility(f.attacker,f.target);
   assert.equal(result.coverBonus,4,'one visible target intersection grants greater cover');
-  visible.add('300,0');visible.add('400,0');visible.add('200,100');visible.add('300,100');
+  visible.add('300,5');visible.add('395,5');visible.add('205,100');visible.add('300,100');
   result=footprintVisibility(f.attacker,f.target);assert.equal(result.coverBonus,0,'more than half visible is not cover under the table policy');
 });
 
 test('a Medium target receives standard cover when exactly half of its corners are visible',()=>{
-  const f=fixture(),visible=new Set(['200,0','300,0']);
+  const f=fixture(),visible=new Set(['205,5','295,5']);
   f.attacker.checkCollision=destination=>!visible.has(`${destination.x},${destination.y}`);
   let result=footprintVisibility(f.attacker,f.target);
   assert.equal(result.totalPoints,4);assert.equal(result.visiblePoints,2);assert.equal(result.coverBonus,2);
-  visible.add('200,100');result=footprintVisibility(f.attacker,f.target);
+  visible.add('205,95');result=footprintVisibility(f.attacker,f.target);
   assert.equal(result.visiblePoints,3);assert.equal(result.coverBonus,0,'more than half visible grants no wall cover');
 });
 
 test('rays visible from different observer corners do not combine into an unobstructed view',()=>{
-  const f=fixture(),origins=new Map([['0,0','200,0'],['0,100','300,0'],['100,0','200,100'],['100,100','300,100']]);
+  const f=fixture(),origins=new Map([['5,5','205,5'],['5,95','295,5'],['95,5','205,95'],['95,95','295,95']]);
   f.attacker.checkCollision=(destination,{origin})=>origins.get(`${origin.x},${origin.y}`)!==`${destination.x},${destination.y}`;
   const result=footprintVisibility(f.attacker,f.target);
   assert.equal(result.visible,true);assert.equal(result.unobstructed,false);assert.equal(result.visiblePoints,1);assert.equal(result.coverBonus,4);
